@@ -198,7 +198,7 @@ const mobilePanels = panels;
     <div
       id="mobile-panel"
       hidden
-      class="absolute right-0 top-full z-10 max-h-[calc(100dvh-6rem)] w-full max-w-[26rem] overflow-y-auto overscroll-contain rounded-2xl border border-hairline bg-surface p-5 shadow-frame min-[1080px]:hidden"
+      class="mobile-panel absolute right-0 top-full z-10 w-full max-w-[26rem] overflow-y-auto overscroll-contain rounded-2xl border border-hairline bg-surface p-5 shadow-frame min-[1080px]:hidden"
     >
       <div class="flex flex-col gap-2.5 border-b border-hairline pb-5">
         <Button href={cta.primary.href} size="lg" radius="full">{cta.primary.label}</Button>
@@ -284,6 +284,15 @@ const mobilePanels = panels;
     --panel-fg: var(--color-ink-inverse);
     --panel-muted: var(--color-ink-subtle);
     --panel-hover: rgb(250 249 245 / 0.07);
+  }
+
+  /* Panelin yüksekliği açılışta ölçülüyor: sabit calc(100dvh - 6rem)
+     panelin gerçek başlangıç noktasını bilmediği için alt kenarı ekranın
+     dışına taşırıyordu (ölçüm: 863px / 852px ekran). */
+  .mobile-panel {
+    max-height: var(--panel-max-h, calc(100dvh - 7.5rem));
+    /* Eski iOS'ta ivmeli kaydırma */
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Panel gövdesi ve kenarı */
@@ -550,21 +559,62 @@ const mobilePanels = panels;
   const toggle = document.getElementById('mobile-toggle');
   const panel = document.getElementById('mobile-panel');
 
+  /**
+   * Arkadaki sayfanın kaydırılmasını engeller.
+   *
+   * `html { overflow: hidden }` iOS Safari'de güvenilir değil: sayfayı her
+   * zaman kilitlemediği gibi, panelin kendi iç kaydırmasını da bozabiliyor.
+   * Bunun yerine gövde sabitleniyor ve kaydırma konumu saklanıp geri veriliyor.
+   */
+  let lockedAt = 0;
+
+  function lockScroll() {
+    lockedAt = window.scrollY;
+    const b = document.body.style;
+    b.position = 'fixed';
+    b.top = `-${lockedAt}px`;
+    b.left = '0';
+    b.right = '0';
+    b.width = '100%';
+  }
+
+  function unlockScroll() {
+    const b = document.body.style;
+    b.removeProperty('position');
+    b.removeProperty('top');
+    b.removeProperty('left');
+    b.removeProperty('right');
+    b.removeProperty('width');
+    window.scrollTo(0, lockedAt);
+  }
+
   function closeMobile() {
     if (!toggle || !panel) return;
+    if (panel.hidden) return;
     panel.hidden = true;
     toggle.setAttribute('aria-expanded', 'false');
     toggle.setAttribute('aria-label', 'Menüyü aç');
-    document.documentElement.style.removeProperty('overflow');
+    unlockScroll();
   }
 
   toggle?.addEventListener('click', () => {
     if (!panel) return;
     const willOpen = panel.hidden;
-    panel.hidden = !willOpen;
+
+    if (willOpen) {
+      panel.hidden = false;
+      // Panelin gerçek üst kenarını ölçüp kalan yüksekliği ver; sabit bir
+      // hesap panelin başlangıç noktasını bilemiyor ve alt kenar taşıyor.
+      const top = panel.getBoundingClientRect().top;
+      panel.style.setProperty('--panel-max-h', `calc(100dvh - ${Math.round(top)}px - 0.75rem)`);
+      lockScroll();
+    } else {
+      panel.hidden = true;
+      unlockScroll();
+    }
+
     toggle.setAttribute('aria-expanded', String(willOpen));
     toggle.setAttribute('aria-label', willOpen ? 'Menüyü kapat' : 'Menüyü aç');
-    document.documentElement.style.overflow = willOpen ? 'hidden' : '';
   });
 
   window.matchMedia('(min-width: 1080px)').addEventListener('change', (e) => {

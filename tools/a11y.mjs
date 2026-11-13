@@ -231,19 +231,43 @@ await send('Emulation.setDeviceMetricsOverride', { width: 360, height: 740, devi
 await send('Page.navigate', { url: ORIGIN + path });
 await sleep(2200);
 
+/* Kilit, `html { overflow: hidden }` yerine gövdeyi sabitleyerek kuruluyor
+   (iOS Safari'de ilki hem sayfayı her zaman kilitlemiyor hem de panelin
+   kendi kaydırmasını bozuyordu). Test ikisini de kabul eder ve asıl ölçüt
+   olarak sayfanın gerçekten kayıp kaymadığına bakar. */
 const mobileOpen = await evaluate(`(() => {
   const t = document.getElementById('mobile-toggle');
   t.click();
   const p = document.getElementById('mobile-panel');
+  const html = document.documentElement.style.overflow === 'hidden';
+  const body = getComputedStyle(document.body).position === 'fixed';
+  const before = window.scrollY;
+  window.scrollTo(0, before + 400);
+  const moved = Math.abs(window.scrollY - before) > 5;
+  window.scrollTo(0, before);
   return JSON.stringify({
     expanded: t.getAttribute('aria-expanded'),
     hidden: p.hidden,
     label: t.getAttribute('aria-label'),
-    scrollLocked: document.documentElement.style.overflow === 'hidden' });
+    scrollLocked: (html || body) && !moved,
+    overflowY: getComputedStyle(p).overflowY,
+    panelScrollable: (() => {
+      p.querySelectorAll('details').forEach((d) => (d.open = true));
+      const ok = p.scrollHeight > p.clientHeight;
+      p.querySelectorAll('details').forEach((d) => (d.open = false));
+      return ok;
+    })(),
+    panelFitsViewport: Math.round(p.getBoundingClientRect().bottom) <= window.innerHeight });
 })()`);
 const mo = JSON.parse(mobileOpen);
 check('Mobil menü açılıyor', mo.expanded === 'true' && mo.hidden === false);
 check('Mobil menü açıkken sayfa kaydırması kilitli', mo.scrollLocked === true);
+check(
+  'Mobil menü panel içinde kaydırılabiliyor',
+  ['auto', 'scroll'].includes(mo.overflowY) && mo.panelScrollable === true,
+  `overflow-y=${mo.overflowY}`,
+);
+check('Mobil menü ekrana sığıyor', mo.panelFitsViewport === true);
 check('Mobil menü etiketi duruma göre değişiyor', mo.label === 'Menüyü kapat', mo.label);
 
 await escape();
