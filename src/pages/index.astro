@@ -44,9 +44,13 @@ const bento = modules.map((m, i) => ({
 
     {/* 1 · Duyuru şeridi — koyu bölgenin ilk katmanı */}
     <div class="hero-dark on-ink" slot="pretop">
-      <Container class="flex items-center justify-center gap-3 py-2.5 text-center">
+      <Container class="flex items-center justify-center py-2.5 text-center">
+        {/* Mobilde kısa sürüm: uzun cümle iki satıra kırılıp 63px yiyordu */}
         <p class="text-small text-ink-subtle">
-          Türkiye’nin en büyük SGK işlem hacmi — her ay 1,7 milyondan fazla çalışan
+          <span class="sm:hidden">Türkiye’nin en büyük SGK işlem hacmi</span>
+          <span class="hidden sm:inline">
+            Türkiye’nin en büyük SGK işlem hacmi — her ay 1,7 milyondan fazla çalışan
+          </span>
         </p>
       </Container>
     </div>
@@ -57,7 +61,7 @@ const bento = modules.map((m, i) => ({
     <HeroBackdrop />
       <Ticker tone="dark" />
       <Container class="framed-dark relative z-10 flex flex-1 flex-col justify-center">
-        <div class="grid gap-14 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)] lg:items-center lg:gap-20 lg:py-28">
+        <div class="grid gap-10 py-10 sm:gap-14 sm:py-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)] lg:items-center lg:gap-20 lg:py-28">
           <div class="stagger" style="--rise-delay: 60ms">
             <p class="font-mono text-chip uppercase text-ink-subtle">SGK Otomasyon Yazılımı</p>
             {/* max-width başlığın kendisinde: `ch` öğenin kendi punto'suna göre

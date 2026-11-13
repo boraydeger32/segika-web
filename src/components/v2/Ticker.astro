@@ -39,7 +39,9 @@ const items = [
 ---
 
 <div class:list={['ticker border-b', dark ? 'border-void-line/60' : 'border-rule bg-paper']}>
-  <div class="mx-auto flex max-w-[var(--container-page)] items-center gap-6 overflow-x-auto px-(--spacing-gutter) py-2.5">
+  <div
+    class="mx-auto flex max-w-[var(--container-page)] items-center gap-4 px-(--spacing-gutter) py-2.5"
+  >
     <p
       class:list={[
         'flex shrink-0 items-center gap-2 font-mono text-chip uppercase',
@@ -51,29 +53,41 @@ const items = [
         ></span>
         <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-electric"></span>
       </span>
-      Bu ay işlenen
+      <span class="hidden sm:inline">Bu ay işlenen</span>
     </p>
-    <dl class="flex shrink-0 items-center gap-5">
+
+    {/* Akış kendi rayında: maske yalnızca rakamlara uygulanıyor,
+        sabit etiket maskenin dışında kaldığı için solmuyor. */}
+    <div class="ticker-rail min-w-0 flex-1 overflow-hidden">
+      <dl class="ticker-items flex w-max items-center gap-5">
       {
-        items.map((item) => (
-          <div class="flex shrink-0 items-baseline gap-1.5">
-            <dt class:list={['font-mono text-chip uppercase', dark ? 'text-ink-subtle' : 'text-ink-muted']}>
-              {item.label}
-            </dt>
-            <dd
-              class:list={[
-                'js-tick font-mono text-chip tabular-nums',
-                dark ? 'text-ink-inverse' : 'text-ink',
-              ]}
-              data-base={item.base}
-              data-suffix={item.suffix}
-            >
-              {item.value}
-            </dd>
-          </div>
-        ))
-      }
-    </dl>
+        /* Liste iki kez basılıyor: ilk kopya tamamen sola kaydığında
+           ikincisi onun yerini alır ve akış kesintisiz görünür. */
+          [...items, ...items].map((item) => (
+            <div class="flex shrink-0 items-baseline gap-1.5">
+              <dt
+                class:list={[
+                  'font-mono text-chip uppercase',
+                  dark ? 'text-ink-subtle' : 'text-ink-muted',
+                ]}
+              >
+                {item.label}
+              </dt>
+              <dd
+                class:list={[
+                  'js-tick font-mono text-chip tabular-nums',
+                  dark ? 'text-ink-inverse' : 'text-ink',
+                ]}
+                data-base={item.base}
+                data-suffix={item.suffix}
+              >
+                {item.value}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
   </div>
 </div>
 
@@ -93,19 +107,56 @@ const items = [
       transform: scale(2.4);
     }
   }
-  /* Şerit yavaşça sola kayar. Fare üstündeyken ve odak içindeyken durur,
-     böylece okumak ya da kopyalamak isteyen kullanıcı engellenmez. */
-  .ticker > div {
-    scrollbar-width: none;
+  /* Rakamlar sürekli sola akar. Dar ekranda içerik alana sığmıyordu ve
+     son öğe kelime ortasından kesilip bozuk duruyordu; akış hâlinde
+     kesinti kasıtlı okunuyor. Fare üstündeyken durur. */
+  .ticker-items {
+    animation: ticker-run 46s linear infinite;
+    will-change: transform;
   }
-  .ticker > div::-webkit-scrollbar {
-    display: none;
+  .ticker-rail:hover .ticker-items,
+  .ticker-rail:focus-within .ticker-items {
+    animation-play-state: paused;
+  }
+  @keyframes ticker-run {
+    to {
+      /* Liste iki kez basılı; yarısı bir tam tur eder.
+         Aradaki boşluk da hesaba katılıyor. */
+      transform: translateX(calc(-50% - 0.625rem));
+    }
+  }
+
+  /* Kenarlarda yumuşak geçiş — satır keskin kesilmesin */
+  .ticker-rail {
+    /* İki kenarda da yumuşak geçiş: akış sürekli olduğu için her an
+       kenarlarda yarım öğe bulunur, keskin kesim bozuk görünür. */
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 1.25rem,
+      #000 calc(100% - 3rem),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 1.25rem,
+      #000 calc(100% - 3rem),
+      transparent 100%
+    );
   }
 
   @media (prefers-reduced-motion: reduce) {
     .js-pulse {
       animation: none;
       opacity: 0.4;
+    }
+    /* Hareket kapalıyken şerit durur ve yatay kaydırılabilir kalır */
+    .ticker-items {
+      animation: none;
+    }
+    .ticker-rail {
+      overflow-x: auto;
     }
   }
 </style>

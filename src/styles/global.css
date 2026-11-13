@@ -161,7 +161,7 @@
 
   /* v2: referans sitelerin hepsinde başlık bundan çok daha büyük.
      Mercury 56, Ramp 60, Linear 64, Stripe 44 — hepsi sıkı tracking'le. */
-  --text-mega: clamp(2.75rem, 1.1rem + 6.6vw, 5.5rem); /* 44 → 88 */
+  --text-mega: clamp(2.375rem, 1rem + 6vw, 5.5rem); /* 38 → 88 */
   --text-mega--line-height: 0.98;
   --text-mega--letter-spacing: -0.035em;
 
