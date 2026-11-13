@@ -264,6 +264,70 @@ const mobilePanels = panels;
 
 <style>
   /* ---------------------------------------------------------------------
+     Panel teması.
+
+     Açılır menüler (mega menü ve mobil panel) header'ın durumunu izler:
+     sayfa üstünde koyu hero'nun devamı olarak koyu, kaydırıldığında
+     açık kapsülle birlikte açık. Renkler tek yerde tanımlanıyor;
+     aşağıdaki kurallar yalnızca bu değişkenleri kullanır.
+  --------------------------------------------------------------------- */
+  #site-header {
+    --panel-bg: var(--color-surface);
+    --panel-border: var(--color-hairline);
+    --panel-fg: var(--color-ink);
+    --panel-muted: var(--color-ink-muted);
+    --panel-hover: var(--color-wash);
+  }
+  #site-header[data-tone='dark'][data-scrolled='false'] {
+    --panel-bg: var(--color-void-soft);
+    --panel-border: var(--color-void-line);
+    --panel-fg: var(--color-ink-inverse);
+    --panel-muted: var(--color-ink-subtle);
+    --panel-hover: rgb(250 249 245 / 0.07);
+  }
+
+  /* Panel gövdesi ve kenarı */
+  .js-menu-panel > div,
+  #mobile-panel {
+    background-color: var(--panel-bg);
+    border-color: var(--panel-border);
+    transition:
+      background-color 320ms linear,
+      border-color 320ms linear;
+  }
+
+  /* Bağlantılar ve başlıklar */
+  .js-menu-panel a,
+  #mobile-panel a:not(.btn-primary),
+  #mobile-panel summary {
+    color: var(--panel-fg);
+  }
+  .js-menu-panel p,
+  #mobile-panel p,
+  #mobile-panel details a,
+  #mobile-panel summary svg {
+    color: var(--panel-muted);
+  }
+  .js-menu-panel a:hover,
+  #mobile-panel a:not(.btn-primary):hover {
+    background-color: var(--panel-hover);
+    color: var(--panel-fg);
+  }
+
+  /* Ayırıcı çizgiler */
+  #mobile-panel .divide-y > * + *,
+  #mobile-panel .border-b {
+    border-color: var(--panel-border);
+  }
+
+  /* Koyu panelde ikincil düğme kenarı ve metni */
+  #site-header[data-tone='dark'][data-scrolled='false'] #mobile-panel a.border {
+    border-color: var(--color-void-line);
+    background-color: transparent;
+    color: var(--color-ink-inverse);
+  }
+
+  /* ---------------------------------------------------------------------
      Ada — iki durum arası morph.
      Geçiş yalnızca bileşik özelliklerde (max-width hariç kaçınılmaz);
      yükseklik hiç değişmediği için sayfa akışı etkilenmiyor.
