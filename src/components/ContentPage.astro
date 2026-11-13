@@ -1,0 +1,105 @@
+---
+import { url } from '../lib/url';
+import Container from './Container.astro';
+import PageHero from './PageHero.astro';
+import Eyebrow from './Eyebrow.astro';
+import CallToAction from './CallToAction.astro';
+import type { ContentPage } from '../data/content-pages';
+
+/**
+ * Metin ağırlıklı iç sayfa şablonu.
+ *
+ * Gövde metni elimde olmayan sayfalarda uydurma yapmıyorum: açıkça işaretli
+ * bir yer tutucu basıyor ve ziyaretçiyi ilgili yere yönlendiriyorum. Başlık,
+ * açıklama ve adres doğru olduğu için arama motoru açısından sayfa yerinde durur.
+ */
+interface Props {
+  page: ContentPage;
+  eyebrow: string;
+  crumbs: { label: string; href?: string }[];
+  /** Aynı grubun diğer sayfaları. */
+  siblings?: { label: string; href: string }[];
+  siblingsLabel?: string;
+  /** Yer tutucunun altında gösterilecek yönlendirme. */
+  fallback?: { label: string; href: string };
+}
+
+const { page, eyebrow, crumbs, siblings = [], siblingsLabel = 'İlgili sayfalar', fallback } =
+  Astro.props;
+
+const hasBody = Boolean(page.body?.length);
+---
+
+<PageHero eyebrow={eyebrow} headline={page.title} intro={page.description} crumbs={crumbs} />
+
+<section>
+  <Container class="py-(--spacing-section)">
+    {
+      hasBody ? (
+        <div class="max-w-[var(--container-text)] space-y-5">
+          {page.body!.map((paragraph) => (
+            <p class="text-ink-muted">{paragraph}</p>
+          ))}
+        </div>
+      ) : (
+        <div
+          class="relative mx-auto max-w-[var(--container-text)] overflow-hidden rounded-lg border border-hairline bg-wash p-8 text-center sm:p-12"
+          role="note"
+        >
+          <div
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-0 opacity-[0.55]"
+            style="background-image: repeating-linear-gradient(135deg, transparent 0 11px, var(--color-hairline) 11px 12px);"
+          />
+          <p class="relative font-mono text-[11px] uppercase tracking-[0.14em] text-ink-muted">
+            Yer tutucu
+          </p>
+          <p class="relative mx-auto mt-3 max-w-[48ch] text-ink-muted">
+            Bu sayfanın gövde metni henüz taşınmadı. Adres ve başlık doğru; metin
+            geldiğinde buraya yazılacak.
+          </p>
+          <p class="relative mt-4 font-mono text-[11px] text-ink-muted">
+            src/data/content-pages.ts → {page.slug} → body
+          </p>
+          {fallback && (
+            <p class="relative mt-6">
+              <a
+                href={fallback.href}
+                class="text-small font-medium text-accent underline decoration-from-font underline-offset-4"
+              >
+                {fallback.label}
+              </a>
+            </p>
+          )}
+        </div>
+      )
+    }
+  </Container>
+</section>
+
+{
+  siblings.length > 0 && (
+    <section class="border-t border-hairline bg-wash" aria-labelledby="kardes-baslik">
+      <Container class="py-14 lg:py-16">
+        <Eyebrow>{siblingsLabel}</Eyebrow>
+        <h2 id="kardes-baslik" class="sr-only">
+          {siblingsLabel}
+        </h2>
+        <ul class="mt-6 grid gap-x-10 border-t border-hairline sm:grid-cols-2 lg:grid-cols-3">
+          {siblings.map((item) => (
+            <li class="border-b border-hairline">
+              <a
+                href={url(item.href)}
+                class="block py-4 text-small text-ink transition-colors hover:text-accent"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Container>
+    </section>
+  )
+}
+
+<CallToAction />

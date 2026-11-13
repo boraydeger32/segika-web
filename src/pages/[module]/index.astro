@@ -1,0 +1,162 @@
+---
+import { url } from '../../lib/url';
+import Base from '../../layouts/Base.astro';
+import Container from '../../components/Container.astro';
+import PageHero from '../../components/PageHero.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import Button from '../../components/Button.astro';
+import ScreenshotFrame from '../../components/ScreenshotFrame.astro';
+import CallToAction from '../../components/CallToAction.astro';
+import { cta } from '../../data/site';
+import { modulePages } from '../../data/module-pages';
+
+/**
+ * Modül detay sayfaları.
+ * URL'ler mevcut sitedeki hâliyle kök seviyede duruyor
+ * (/sgk-tesvik-programi/, /sgk-vizite-programi/ …) — arama trafiği için korundu.
+ */
+export function getStaticPaths() {
+  return modulePages.map((page) => ({
+    params: { module: page.slug },
+    props: { page },
+  }));
+}
+
+const { page } = Astro.props;
+---
+
+<Base title={page.seo.title} description={page.seo.description}>
+  <PageHero
+    eyebrow={page.eyebrow}
+    headline={page.headline}
+    intro={page.intro}
+    crumbs={[
+      { label: 'Program Özellikleri', href: '/kategori/program-ozellikleri/' },
+      { label: page.name },
+    ]}
+  >
+    <div class="mt-9 flex flex-wrap items-center gap-x-6 gap-y-4">
+      <Button href={cta.primary.href} size="lg">{cta.primary.label}</Button>
+      <Button href={cta.secondary.href} variant="quiet">{cta.secondary.label}</Button>
+    </div>
+  </PageHero>
+
+  {/* Ana ürün görseli — sayfanın tek geniş görseli */}
+  <section class="overflow-hidden border-b border-hairline">
+    <Container class="py-12 lg:py-16">
+      <div class="reveal" style="--reveal-delay: 120ms">
+        <ScreenshotFrame screenshot={page.hero.shot} placeholder={page.hero.placeholder} emphasis />
+      </div>
+    </Container>
+  </section>
+
+  {/* Modüle ait rakamlar — koyu panel değil, ana sayfadaki defterle yarışmasın */}
+  {
+    page.figures && (
+      <section class="border-b border-hairline" aria-label="Aylık işlem hacmi">
+        <Container class="py-10">
+          <Eyebrow>Aylık işlem hacmi</Eyebrow>
+          <dl class="mt-6 grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
+            {page.figures.map((figure) => (
+              <div class="border-t border-hairline pt-4">
+                <dd class="text-h3 font-medium tabular-nums">{figure.display}</dd>
+                <dt class="mt-1 font-mono text-label uppercase text-ink-muted">{figure.label}</dt>
+                <p class="mt-1 text-small text-ink-muted">{figure.note}</p>
+              </div>
+            ))}
+          </dl>
+        </Container>
+      </section>
+    )
+  }
+
+  {/* Özellik bölümleri — görseli olanlar iki sütun, olmayanlar tek sütun */}
+  <section>
+    <Container>
+      <div class="divide-y divide-hairline">
+        {
+          page.sections.map((section, i) =>
+            section.placeholder ? (
+              <article class="grid items-center gap-8 py-12 lg:grid-cols-2 lg:gap-16 lg:py-16">
+                <div class:list={[i % 2 === 1 && 'lg:order-2']}>
+                  <h2 class="max-w-[22ch] text-h2">{section.heading}</h2>
+                  <p class="mt-4 max-w-[52ch] text-ink-muted">{section.body}</p>
+                  {section.href && (
+                    <a
+                      href={url(section.href)}
+                      class="group mt-5 inline-flex items-center gap-1.5 text-small font-medium text-accent"
+                    >
+                      Daha fazla bilgi edinin
+                      <svg
+                        class="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                        viewBox="0 0 14 14"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5"
+                          stroke="currentColor"
+                          stroke-width="1.4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </a>
+                  )}
+                </div>
+                <ScreenshotFrame
+                  screenshot={section.shot}
+                  placeholder={section.placeholder}
+                  class={i % 2 === 1 ? 'lg:order-1' : ''}
+                />
+              </article>
+            ) : (
+              <article class="grid gap-x-16 gap-y-4 py-12 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:py-14">
+                <h2 class="text-h3 font-medium">{section.heading}</h2>
+                <div>
+                  <p class="max-w-[62ch] text-ink-muted">{section.body}</p>
+                  {section.href && (
+                    <a
+                      href={url(section.href)}
+                      class="mt-4 inline-block text-small font-medium text-accent underline decoration-from-font underline-offset-4"
+                    >
+                      Daha fazla bilgi edinin
+                    </a>
+                  )}
+                </div>
+              </article>
+            ),
+          )
+        }
+      </div>
+    </Container>
+  </section>
+
+  {/* Kardeş sayfalar */}
+  {
+    page.related.length > 0 && (
+      <section class="border-t border-hairline bg-wash" aria-labelledby="ilgili-baslik">
+        <Container class="py-14 lg:py-16">
+          <Eyebrow>Bu modülün özellikleri</Eyebrow>
+          <h2 id="ilgili-baslik" class="sr-only">
+            {page.name} ile ilgili sayfalar
+          </h2>
+          <ul class="mt-6 grid gap-x-10 border-t border-hairline sm:grid-cols-2 lg:grid-cols-3">
+            {page.related.map((link) => (
+              <li class="border-b border-hairline">
+                <a
+                  href={url(link.href)}
+                  class="block py-4 text-small text-ink transition-colors hover:text-accent"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </section>
+    )
+  }
+
+  <CallToAction />
+</Base>

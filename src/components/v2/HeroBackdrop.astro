@@ -1,0 +1,201 @@
+---
+/**
+ * Hero arka plan katmanı.
+ *
+ * Hero ekranı doldurduğunda altta ve üstte geniş düz alan kalıyordu. Burayı
+ * süslemeyle değil, ürünün kendi işiyle dolduruyoruz: arkada sürekli akan bir
+ * işlem kütüğü. Segika'nın yaptığı tam olarak bu — her ay milyonlarca kaydı
+ * sessizce işlemek.
+ *
+ * Katmanlar (arkadan öne):
+ *   1. Ortam ışığı — marka yeşilinden türetilmiş iki yumuşak kaynak
+ *   2. Nokta ızgara — sitenin genel dokusu
+ *   3. İşlem kütüğü — yavaşça kayan mono satırlar, kenarlarda
+ *   4. Vinyet — merkeze odaklamak için
+ *
+ * Kütükte kişisel veri yok: yalnızca kamuya açık kanun kodları ve işlem
+ * durumları. Sicil numaraları maskeli (••••) — gerçek bir numara taklit
+ * edilmiyor.
+ *
+ * Hepsi `aria-hidden`; ekran okuyucu için anlamı yok, dekoratif.
+ */
+
+/** Kütük satırları — tekrar ederek sonsuz akış izlenimi verir. */
+const entries = [
+  { code: '06111', job: 'TEŞVİK', state: 'HESAPLANDI' },
+  { code: '•••••', job: 'RAPOR', state: 'ONAYLANDI' },
+  { code: '05510', job: 'TEŞVİK', state: 'HESAPLANDI' },
+  { code: '•••••', job: 'KİMLİK', state: 'BİLDİRİLDİ' },
+  { code: '14857', job: 'TEŞVİK', state: 'HESAPLANDI' },
+  { code: '•••••', job: 'İŞKUR', state: 'GÖNDERİLDİ' },
+  { code: '03294', job: 'TEŞVİK', state: 'HESAPLANDI' },
+  { code: '•••••', job: 'RAPOR', state: 'ONAYLANDI' },
+  { code: '02828', job: 'TEŞVİK', state: 'HESAPLANDI' },
+  { code: '•••••', job: 'KAZA', state: 'TESPİT EDİLDİ' },
+  { code: '05746', job: 'TEŞVİK', state: 'HESAPLANDI' },
+  { code: '•••••', job: 'KİMLİK', state: 'BİLDİRİLDİ' },
+];
+
+/* Kesintisiz kaydırma için liste iki kez basılıyor: ilk kopya tam yukarı
+   kaydığında ikincisi onun yerini alır ve geçiş görünmez. */
+const stream = [...entries, ...entries];
+---
+
+<div class="backdrop" aria-hidden="true">
+  {/* 1 · Ortam ışığı */}
+  <div class="glow"></div>
+
+  {/* 3 · İşlem kütüğü — dört sütun, komşular ters yönde akar */}
+  <div class="log">
+    {
+      [0, 1, 2, 3].map((col) => (
+        <ul class:list={['log-track', col % 2 === 1 && 'log-track-rev']}>
+          {stream.map((e) => (
+            <li>
+              <span class="code">{e.code}</span>
+              <span class="job">{e.job}</span>
+              <span class="state">{e.state}</span>
+              <span class="tick">✓</span>
+            </li>
+          ))}
+        </ul>
+      ))
+    }
+  </div>
+
+  {/* 4 · Vinyet */}
+  <div class="vignette"></div>
+</div>
+
+<style>
+  .backdrop {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    /* İçerik bu katmanın üstünde kalmalı */
+    z-index: 0;
+  }
+
+  /* --- 1 · Ortam ışığı ------------------------------------------------ */
+  .glow {
+    position: absolute;
+    inset: -20% -10%;
+    background:
+      radial-gradient(
+        46% 52% at 18% 22%,
+        rgb(44 188 99 / 0.16) 0%,
+        rgb(44 188 99 / 0.05) 42%,
+        transparent 72%
+      ),
+      radial-gradient(
+        40% 44% at 82% 68%,
+        rgb(44 188 99 / 0.09) 0%,
+        transparent 68%
+      ),
+      radial-gradient(60% 50% at 50% 0%, rgb(255 255 255 / 0.04) 0%, transparent 70%);
+  }
+
+  /* --- 3 · İşlem kütüğü ----------------------------------------------- */
+  .log {
+    position: absolute;
+    top: -12%;
+    left: 0;
+    right: 0;
+    height: 124%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0 2rem;
+    padding: 0 1.5rem;
+    overflow: hidden;
+    /* Üst ve altta eriyerek kaybolsun; kesik satır görünmesin */
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      #000 16%,
+      #000 84%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      #000 16%,
+      #000 84%,
+      transparent 100%
+    );
+  }
+  /* Dar ekranda kütük yok: sütunlar sıkışıp okunaksız bir karmaşa oluyor */
+  @media (max-width: 1023px) {
+    .log {
+      display: none;
+    }
+  }
+
+  .log-track {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 1.15rem;
+    align-content: start;
+    animation: drift 96s linear infinite;
+  }
+  .log-track:nth-child(2) {
+    animation-duration: 112s;
+  }
+  .log-track:nth-child(3) {
+    animation-duration: 84s;
+  }
+  .log-track:nth-child(4) {
+    animation-duration: 128s;
+  }
+  .log-track-rev {
+    animation-direction: reverse;
+  }
+
+  /* Liste iki kez basıldığı için yarısı kadar kaydırmak tam bir tur eder */
+  @keyframes drift {
+    to {
+      transform: translateY(-50%);
+    }
+  }
+
+  .log-track li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    color: rgb(250 249 245 / 0.055);
+  }
+  .log-track .code {
+    color: rgb(250 249 245 / 0.085);
+    font-variant-numeric: tabular-nums;
+  }
+  .log-track .job {
+    min-width: 4.4rem;
+  }
+  .log-track .state {
+    flex: 1;
+  }
+  .log-track .tick {
+    color: rgb(44 188 99 / 0.16);
+  }
+
+  /* --- 4 · Vinyet ------------------------------------------------------ */
+  .vignette {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(62% 58% at 38% 50%, rgb(11 11 12 / 0.92) 0%, transparent 70%),
+      radial-gradient(70% 64% at 50% 50%, transparent 30%, rgb(11 11 12 / 0.6) 100%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .log-track {
+      animation: none;
+    }
+  }
+</style>

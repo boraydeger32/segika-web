@@ -1,0 +1,72 @@
+---
+import { url } from '../lib/url';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /**
+   * Aynı içeriğin birden fazla adreste sunulduğu durumlarda asıl adres.
+   * Verilmezse sayfanın kendi yolu kullanılır.
+   */
+  canonicalPath?: string;
+}
+
+const { title, description, canonicalPath } = Astro.props;
+const canonical = new URL(canonicalPath ?? Astro.url.pathname, site.url).href;
+---
+
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={url('/brand/favicon-64.png')} type="image/png" />
+
+    <!-- Kritik font: ilk boyadaki metin bunu bekler -->
+    <link
+      rel="preload"
+      href={url('/fonts/ibm-plex-sans-latin-wght-normal.woff2')}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href={url('/fonts/ibm-plex-sans-latin-ext-wght-normal.woff2')}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="tr_TR" />
+    <meta property="og:site_name" content={site.tagline} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+  </head>
+
+  <body>
+    <a
+      href="#icerik"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-accent focus:px-4 focus:py-2.5 focus:text-canvas"
+    >
+      İçeriğe geç
+    </a>
+
+    <Header />
+
+    <main id="icerik">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

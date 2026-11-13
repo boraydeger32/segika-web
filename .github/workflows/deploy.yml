@@ -1,0 +1,58 @@
+# GitHub Pages dağıtımı.
+#
+# main dalına her push'ta siteyi derler ve yayınlar. Astro çıktısı statik
+# olduğu için sunucu gerekmiyor.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Pages ayarlarını değiştirdikten sonra elle tetiklemek için
+  workflow_dispatch:
+
+# Pages'e yazma izni; içerik okuma izni
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Aynı anda tek dağıtım; sıradakiler beklesin, çalışan iptal edilmesin
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # BASE_PATH: proje sayfasında site alt yolda servis edilir
+      # (ör. /segika-web/). astro.config.mjs bunu okuyor.
+      - name: Build
+        run: npm run build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

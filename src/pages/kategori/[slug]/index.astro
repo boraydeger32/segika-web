@@ -1,0 +1,57 @@
+---
+import { url } from '../../../lib/url';
+import Base from '../../../layouts/Base.astro';
+import Container from '../../../components/Container.astro';
+import PageHero from '../../../components/PageHero.astro';
+import Eyebrow from '../../../components/Eyebrow.astro';
+import CallToAction from '../../../components/CallToAction.astro';
+import { categories } from '../../../data/categories';
+
+export function getStaticPaths() {
+  return categories.map((category) => ({
+    params: { slug: category.slug },
+    props: { category },
+  }));
+}
+
+const { category } = Astro.props;
+---
+
+<Base
+  title={`${category.label} — Segika SGK Otomasyon Yazılımı`}
+  description={category.seoDescription}
+>
+  <PageHero
+    eyebrow={category.label}
+    headline={category.headline}
+    intro={category.intro}
+    crumbs={[{ label: category.label }]}
+  />
+
+  {
+    category.groups.map((group) => (
+      <section class="border-b border-hairline" aria-label={group.caption}>
+        <Container class="py-14 lg:py-16">
+          <Eyebrow>{group.caption}</Eyebrow>
+          <ul class="mt-8 divide-y divide-hairline border-y border-hairline">
+            {group.entries.map((entry) => (
+              <li>
+                <a
+                  href={url(entry.href)}
+                  class="group grid gap-2 py-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:items-baseline lg:gap-10"
+                >
+                  <span class="text-h3 font-medium text-ink group-hover:text-accent">
+                    {entry.title}
+                  </span>
+                  <span class="text-small text-ink-muted">{entry.description}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </section>
+    ))
+  }
+
+  <CallToAction tone="wash" />
+</Base>

@@ -1,0 +1,87 @@
+---
+import { url } from '../lib/url';
+import Container from './Container.astro';
+import { footerColumns, legalLinks, contact, site } from '../data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-hairline bg-wash">
+  <Container class="py-16 lg:py-20">
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(4,1fr)] lg:gap-8">
+      <div class="lg:pr-8">
+        <img
+          src={url('/brand/segika-wordmark.png')}
+          alt="Segika"
+          width="130"
+          height="40"
+          class="h-[22px] w-auto"
+        />
+        <p class="mt-4 max-w-[30ch] text-small text-ink-muted">
+          SGK teşvik, vizite, kimlik bildirimi ve işkur süreçlerini tek panelden yürüten
+          SGK otomasyon yazılımı.
+        </p>
+        <dl class="mt-6 space-y-1.5 text-small">
+          <div class="flex gap-2">
+            <dt class="sr-only">Telefon</dt>
+            <dd><a href={contact.phone.href} class="text-ink-muted hover:text-accent">{contact.phone.label}</a></dd>
+          </div>
+          <div class="flex gap-2">
+            <dt class="sr-only">GSM</dt>
+            <dd><a href={contact.gsm.href} class="text-ink-muted hover:text-accent">{contact.gsm.label}</a></dd>
+          </div>
+          <div class="flex gap-2">
+            <dt class="sr-only">E-posta</dt>
+            <dd><a href={contact.email.href} class="text-ink-muted hover:text-accent">{contact.email.label}</a></dd>
+          </div>
+        </dl>
+        <a
+          href={contact.whatsapp.href}
+          rel="noopener"
+          class="mt-5 inline-flex items-center gap-2 rounded-md border border-hairline bg-surface px-3.5 py-2 text-small text-ink transition-colors hover:border-ink-muted"
+        >
+          <svg class="h-4 w-4 text-brand" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path
+              d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.87 9.87 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 1.67c2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.25 8.24a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24Zm-2.6 4.3c-.15-.34-.3-.35-.44-.36h-.38c-.13 0-.34.05-.52.25-.18.2-.68.67-.68 1.63s.7 1.89.8 2.02c.1.13 1.36 2.18 3.37 2.97 1.67.66 2.01.53 2.37.5.36-.04 1.17-.48 1.33-.94.17-.46.17-.86.12-.94-.05-.08-.18-.13-.38-.23-.2-.1-1.17-.58-1.35-.64-.18-.07-.31-.1-.44.1-.13.2-.5.64-.62.77-.11.13-.23.15-.43.05-.2-.1-.84-.31-1.6-.99-.6-.53-1-1.18-1.11-1.38-.12-.2-.01-.31.09-.41.09-.09.2-.23.3-.35.1-.12.13-.2.2-.33.06-.13.03-.25-.02-.35-.05-.1-.44-1.07-.6-1.46Z"
+            />
+          </svg>
+          {contact.whatsapp.label}
+        </a>
+      </div>
+
+      {
+        footerColumns.map((column) => (
+          <div>
+            <p class="font-mono text-label uppercase text-ink-muted">{column.label}</p>
+            <ul class="mt-4 space-y-2">
+              {column.links.map((link) => (
+                <li>
+                  <a href={url(link.href)} class="text-small text-ink-muted transition-colors hover:text-accent">
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <div
+      class="mt-14 flex flex-col gap-4 border-t border-hairline pt-6 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p class="text-small text-ink-muted">© {year} {site.name} · Tüm hakları saklıdır</p>
+      <ul class="flex flex-wrap gap-x-5 gap-y-2">
+        {
+          legalLinks.map((link) => (
+            <li>
+              <a href={url(link.href)} class="text-small text-ink-muted transition-colors hover:text-accent">
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Container>
+</footer>

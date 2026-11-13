@@ -1,0 +1,87 @@
+---
+import { url } from '../../lib/url';
+/**
+ * /blog/ mevcut sitede var ama içerik duyurular ve rehber altında toplanmış.
+ * Adres korunuyor, ziyaretçi doğru yere yönlendiriliyor.
+ */
+import Base from '../../layouts/Base.astro';
+import Container from '../../components/Container.astro';
+import PageHero from '../../components/PageHero.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import CallToAction from '../../components/CallToAction.astro';
+import { featuredGuides } from '../../data/services';
+
+const sections = [
+  {
+    title: 'Duyurular',
+    body: 'Üründen ve mevzuattan haberler.',
+    href: '/duyurular/',
+  },
+  {
+    title: 'SGK İşveren Rehberi',
+    body: 'İşveren yükümlülükleri, denetim süreçleri ve idari para cezaları.',
+    href: '/kategori/sgk-isveren-rehberi/',
+  },
+  {
+    title: 'SGK Teşvikleri',
+    body: 'Yürürlükteki teşvikler ve kapsamları.',
+    href: '/kategori/sgk-tesvikleri/',
+  },
+];
+---
+
+<Base
+  title="Blog — Segika SGK Otomasyon Yazılımı"
+  description="Segika'nın yazıları duyurular, SGK İşveren Rehberi ve SGK Teşvikleri bölümlerinde toplanıyor."
+>
+  <PageHero
+    eyebrow="Blog"
+    headline="Yazılar burada|toplanıyor."
+    intro="İçerikler konusuna göre üç bölüme ayrıldı."
+    crumbs={[{ label: 'Blog' }]}
+  />
+
+  <section class="border-b border-hairline">
+    <Container class="py-14 lg:py-16">
+      <ul class="divide-y divide-hairline border-y border-hairline">
+        {
+          sections.map((section) => (
+            <li>
+              <a
+                href={url(section.href)}
+                class="group grid gap-2 py-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:items-baseline lg:gap-10"
+              >
+                <span class="text-h3 font-medium group-hover:text-accent">{section.title}</span>
+                <span class="text-small text-ink-muted">{section.body}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  </section>
+
+  <section>
+    <Container class="py-14 lg:py-16">
+      <Eyebrow>Öne çıkanlar</Eyebrow>
+      <ul class="mt-8 divide-y divide-hairline border-y border-hairline">
+        {
+          featuredGuides.map((guide) => (
+            <li>
+              <a
+                href={url(guide.href)}
+                class="group grid gap-2 py-6 lg:grid-cols-[8rem_minmax(0,24rem)_minmax(0,1fr)] lg:items-baseline lg:gap-10"
+              >
+                <span class="font-mono text-label uppercase text-ink-muted">{guide.category}</span>
+                <span class="text-h3 font-medium group-hover:text-accent">{guide.title}</span>
+                <span class="text-small text-ink-muted">{guide.summary}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  </section>
+
+  <CallToAction tone="wash" />
+</Base>

@@ -1,0 +1,176 @@
+---
+import Container from '../Container.astro';
+import Eyebrow from '../Eyebrow.astro';
+
+/**
+ * Akış şeması — ürünün ne yaptığını tek bakışta anlatır.
+ *
+ * SGK'dan veri çekilir, Segika işler, dört ayrı kuruma bildirim gider.
+ * Bağlantı çizgileri görünür olunca soldan sağa çizilir (stroke-dasharray
+ * tekniği); kutular sırayla belirir.
+ *
+ * SVG tek bir viewBox içinde: duyarlılık için ayrı mobil/masaüstü çizim
+ * tutmak yerine ölçekleniyor, dar ekranda dikey listeye düşüyor.
+ */
+
+const outputs = [
+  { label: 'Emniyet', note: 'Kimlik bildirimi' },
+  { label: 'Jandarma', note: 'Kimlik bildirimi' },
+  { label: 'İŞKUR', note: 'İşgücü çizelgesi' },
+  { label: 'Medula', note: 'Rapor onayı' },
+];
+---
+
+<section class="border-t border-rule" aria-labelledby="akis-baslik">
+  <Container class="framed py-(--spacing-section)">
+    <div class="rise max-w-[44rem]">
+      <Eyebrow>Nasıl çalışır</Eyebrow>
+      <h2 id="akis-baslik" class="mt-4 text-h2">
+        Veri SGK’dan gelir, bildirim kurumlara gider.
+      </h2>
+      <p class="mt-4 text-ink-muted">
+        Arada yaptığınız hiçbir işlem yok. Sistem SGK servislerine bağlı çalışır,
+        personel hareketlerini izler ve gereken bildirimi ilgili kuruma iletir.
+      </p>
+    </div>
+
+    {/* Geniş ekran: çizimli şema.
+        Beş sütun — kutu · çizgi · kutu · çizgi · liste. Çizgi sütunları
+        kendi SVG'lerini taşıyor, böylece hiçbir öğe mutlak konumlanmıyor
+        ve hizalama ızgaranın kendisinden geliyor. */}
+    <div class="flow mt-16 hidden lg:grid lg:grid-cols-[minmax(0,14rem)_5rem_minmax(0,13rem)_5rem_minmax(0,18rem)] lg:items-center">
+      {/* Kaynak */}
+      <div
+        class="flow-node rounded-lg border border-hairline bg-surface p-5"
+        style="--node-delay: 0ms"
+      >
+        <p class="font-mono text-chip uppercase text-ink-muted">Kaynak</p>
+        <p class="mt-2 text-h3 font-medium">SGK</p>
+        <p class="mt-2 text-small text-ink-muted">
+          İşe giriş-çıkış, tahakkuk, sağlık raporu servisleri
+        </p>
+      </div>
+
+      {/* SGK → Segika */}
+      <svg class="h-6 w-full" viewBox="0 0 80 2" fill="none" preserveAspectRatio="none" aria-hidden="true">
+        <path class="flow-line" pathLength="1" vector-effect="non-scaling-stroke" style="--line-delay: 240ms" d="M0 1 H80" />
+      </svg>
+
+      {/* İşleme */}
+      <div
+        class="flow-node rounded-lg border-2 border-electric bg-surface p-5 text-center"
+        style="--node-delay: 420ms"
+      >
+        <p class="font-mono text-chip uppercase text-ink-muted">İşleme</p>
+        <p class="mt-2 text-h3 font-medium">Segika</p>
+        <p class="mt-2 text-small text-ink-muted">İzler, hesaplar, bildirir</p>
+      </div>
+
+      {/* Segika → dört çıkış */}
+      <svg
+        class="h-[13.25rem] w-full"
+        viewBox="0 0 80 212"
+        fill="none"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <path class="flow-line" pathLength="1" vector-effect="non-scaling-stroke" style="--line-delay: 700ms" d="M0 106 H40 V26 H80" />
+        <path class="flow-line" pathLength="1" vector-effect="non-scaling-stroke" style="--line-delay: 780ms" d="M0 106 H40 V79 H80" />
+        <path class="flow-line" pathLength="1" vector-effect="non-scaling-stroke" style="--line-delay: 860ms" d="M0 106 H40 V133 H80" />
+        <path class="flow-line" pathLength="1" vector-effect="non-scaling-stroke" style="--line-delay: 940ms" d="M0 106 H40 V186 H80" />
+      </svg>
+
+      {/* Çıkışlar */}
+      <ul class="space-y-3">
+        {
+          outputs.map((out, i) => (
+            <li
+              class="flow-node flex items-baseline justify-between gap-4 rounded-md border border-hairline bg-surface px-4 py-3"
+              style={`--node-delay: ${820 + i * 80}ms`}
+            >
+              <span class="font-medium">{out.label}</span>
+              <span class="font-mono text-chip uppercase text-ink-muted">{out.note}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    {/* Dar ekran: dikey liste */}
+    <ol class="stagger mt-12 space-y-3 lg:hidden">
+      <li class="rounded-lg border border-hairline bg-surface p-5">
+        <p class="font-mono text-chip uppercase text-ink-muted">01 · Kaynak</p>
+        <p class="mt-2 text-h3 font-medium">SGK</p>
+        <p class="mt-1 text-small text-ink-muted">
+          İşe giriş-çıkış, tahakkuk ve sağlık raporu servisleri
+        </p>
+      </li>
+      <li class="rounded-lg border border-electric bg-accent-wash p-5">
+        <p class="font-mono text-chip uppercase text-ink-muted">02 · İşleme</p>
+        <p class="mt-2 text-h3 font-medium">Segika</p>
+        <p class="mt-1 text-small text-ink-muted">
+          Hareketleri izler, hesaplar ve gereken bildirimi hazırlar
+        </p>
+      </li>
+      <li class="rounded-lg border border-hairline bg-surface p-5">
+        <p class="font-mono text-chip uppercase text-ink-muted">03 · Bildirim</p>
+        <ul class="mt-3 space-y-2">
+          {
+            outputs.map((out) => (
+              <li class="flex items-baseline justify-between gap-4 border-b border-hairline pb-2 last:border-0 last:pb-0">
+                <span class="font-medium">{out.label}</span>
+                <span class="font-mono text-chip uppercase text-ink-muted">{out.note}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </li>
+    </ol>
+  </Container>
+</section>
+
+<style>
+  /* Kutular sırayla belirir */
+  .flow-node {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 520ms var(--ease-out-quiet),
+      transform 520ms var(--ease-out-quiet);
+    transition-delay: var(--node-delay, 0ms);
+  }
+  .flow.is-in .flow-node {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Çizgiler soldan sağa çizilir.
+     Yolların `pathLength="1"` özniteliği var (CSS'te değil, SVG'de —
+     CSS tarafında geçersiz bir özellik), böylece dasharray 1 birimle
+     çalışıyor ve her yolun gerçek uzunluğunu ölçmeye gerek kalmıyor. */
+  .flow-line {
+    stroke: var(--color-hairline);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 680ms var(--ease-precise);
+    transition-delay: var(--line-delay, 0ms);
+  }
+  .flow.is-in .flow-line {
+    stroke-dashoffset: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flow-node {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .flow-line {
+      stroke-dashoffset: 0 !important;
+      transition: none !important;
+    }
+  }
+</style>

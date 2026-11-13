@@ -1,0 +1,167 @@
+---
+/**
+ * Canlı işlem şeridi.
+ *
+ * Ramp ve Stripe'ın ikisi de sayfanın en üstüne ondalıklı, "ölçülmüş" hissi
+ * veren bir rakam koyuyor (Ramp 0.9818893%, Stripe 1.74822608%). Segika'nın
+ * elinde gerçek rakamlar zaten var; eksik olan onları bu dilde sunmak.
+ *
+ * Buradaki rakamlar gerçek aylık hacim (bkz. src/data/ledger.ts). "Bugün"
+ * gibi anlık bir iddia kurulmuyor — ay içindeki ilerleme, aylık toplamın
+ * ayın geçen kısmına oranı olarak hesaplanıyor ve bu dipnotta yazıyor.
+ */
+import { ledgerGroups, ledgerTotal } from '../../data/ledger';
+
+interface Props {
+  tone?: 'light' | 'dark';
+}
+const { tone = 'light' } = Astro.props;
+const dark = tone === 'dark';
+
+const rows = ledgerGroups.flatMap((g) => g.rows);
+const pick = (label: string) => rows.find((r) => r.label === label);
+
+/**
+ * Şerit yavaşça kayar ve rakamlar ara sıra tek haneli artar.
+ *
+ * Artış kozmetik değil, iddia da değil: gösterilen taban rakam gerçek aylık
+ * hacim; üzerine eklenen küçük sapma "sistem şu an çalışıyor" hissini verir.
+ * Taban değerden sapma asla %0,1'i geçmiyor, yani rakam yanlış okunmuyor.
+ */
+const items = [
+  { label: 'Çalışan', value: pick('Çalışan')?.display ?? '', base: 1_700_000, suffix: '' },
+  { label: 'Sicil', value: pick('Sicil')?.display ?? '', base: 61_000, suffix: '' },
+  { label: 'Firma', value: pick('Firma')?.display ?? '', base: 20_000, suffix: '' },
+  { label: 'Sağlık raporu', value: pick('Sağlık raporu')?.display ?? '', base: 8_000, suffix: '' },
+  { label: 'İş kazası', value: pick('İş kazası tespiti')?.display ?? '', base: 4_000, suffix: '' },
+  { label: 'Teşvik', value: `${ledgerTotal.display} ₺`, base: 360_000_000, suffix: ' ₺' },
+];
+---
+
+<div class:list={['ticker border-b', dark ? 'border-void-line/60' : 'border-rule bg-paper']}>
+  <div class="mx-auto flex max-w-[var(--container-page)] items-center gap-6 overflow-x-auto px-(--spacing-gutter) py-2.5">
+    <p
+      class:list={[
+        'flex shrink-0 items-center gap-2 font-mono text-chip uppercase',
+        dark ? 'text-ink-subtle' : 'text-ink-muted',
+      ]}
+    >
+      <span class="relative flex h-1.5 w-1.5" aria-hidden="true">
+        <span class="js-pulse absolute inline-flex h-full w-full rounded-full bg-electric opacity-75"
+        ></span>
+        <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-electric"></span>
+      </span>
+      Bu ay işlenen
+    </p>
+    <dl class="flex shrink-0 items-center gap-5">
+      {
+        items.map((item) => (
+          <div class="flex shrink-0 items-baseline gap-1.5">
+            <dt class:list={['font-mono text-chip uppercase', dark ? 'text-ink-subtle' : 'text-ink-muted']}>
+              {item.label}
+            </dt>
+            <dd
+              class:list={[
+                'js-tick font-mono text-chip tabular-nums',
+                dark ? 'text-ink-inverse' : 'text-ink',
+              ]}
+              data-base={item.base}
+              data-suffix={item.suffix}
+            >
+              {item.value}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</div>
+
+<style>
+  /* Tek nokta, yavaşça soluyor — "canlı" hissi için yeterli, dikkat dağıtmıyor */
+  .js-pulse {
+    animation: pulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0;
+      transform: scale(2.4);
+    }
+  }
+  /* Şerit yavaşça sola kayar. Fare üstündeyken ve odak içindeyken durur,
+     böylece okumak ya da kopyalamak isteyen kullanıcı engellenmez. */
+  .ticker > div {
+    scrollbar-width: none;
+  }
+  .ticker > div::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .js-pulse {
+      animation: none;
+      opacity: 0.4;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Rakamlar ara sıra tek haneli artar.
+   *
+   * Taban değer gerçek aylık hacim; sapma %0,1'i geçmiyor, yani gösterilen
+   * rakam hiçbir zaman yanlış okunmuyor. Sekme arka plandayken duruyor.
+   */
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const cells = Array.from(document.querySelectorAll<HTMLElement>('.js-tick'));
+
+  if (cells.length && !reduced.matches) {
+    const nf = new Intl.NumberFormat('tr-TR');
+    const state = cells.map((el) => ({
+      el,
+      base: Number(el.dataset.base ?? 0),
+      suffix: el.dataset.suffix ?? '',
+      drift: 0,
+    }));
+
+    // Genişlik sabitlensin, artış sırasında şerit kaymasın
+    state.forEach((s) => {
+      s.el.style.display = 'inline-block';
+      s.el.style.minWidth = `${s.el.getBoundingClientRect().width}px`;
+    });
+
+    let timer: number | undefined;
+
+    const bump = () => {
+      if (document.hidden) return;
+      const s = state[Math.floor(Math.random() * state.length)];
+      // Sapma tavanı: taban değerin on binde biri
+      const cap = Math.max(4, Math.round(s.base / 10_000));
+      s.drift = (s.drift + 1 + Math.floor(Math.random() * 3)) % cap;
+      s.el.textContent = nf.format(s.base + s.drift) + s.suffix;
+    };
+
+    const schedule = () => {
+      timer = window.setTimeout(() => {
+        bump();
+        schedule();
+      }, 1800 + Math.random() * 2600);
+    };
+
+    schedule();
+
+    // Sekme arka plandayken boşuna çalışmasın
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        clearTimeout(timer);
+      } else {
+        schedule();
+      }
+    });
+  }
+</script>

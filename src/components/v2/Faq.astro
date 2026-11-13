@@ -1,0 +1,84 @@
+---
+import Container from '../Container.astro';
+import Eyebrow from '../Eyebrow.astro';
+import { faq, faqIntro } from '../../data/faq';
+import { contact } from '../../data/site';
+
+/**
+ * Sıkça sorulan sorular.
+ *
+ * Yerli <details> kullanılıyor: JS olmadan çalışır, klavyeyle gezilir,
+ * tarayıcının sayfa içi aramasıyla kapalı içerik de bulunur. Özel bir
+ * akordiyon yazmaya gerek yok.
+ *
+ * İlk soru açık geliyor — bölümün ne olduğu bir bakışta anlaşılsın diye.
+ */
+---
+
+<section class="border-t border-rule" aria-labelledby="sss-baslik">
+  <Container class="framed py-(--spacing-section)">
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16">
+      <div class="rise lg:sticky lg:top-28 lg:self-start">
+        <Eyebrow>{faqIntro.eyebrow}</Eyebrow>
+        <h2 id="sss-baslik" class="mt-4 text-h2">{faqIntro.title}</h2>
+        <p class="mt-4 text-small text-ink-muted">{faqIntro.body}</p>
+        <div class="mt-5 flex flex-col gap-1.5">
+          <a
+            href={contact.gsm.href}
+            class="text-small font-medium text-accent underline decoration-from-font underline-offset-4"
+          >
+            {contact.gsm.label}
+          </a>
+          <a
+            href={contact.whatsapp.href}
+            rel="noopener"
+            class="text-small font-medium text-accent underline decoration-from-font underline-offset-4"
+          >
+            WhatsApp’tan yazın
+          </a>
+        </div>
+      </div>
+
+      <div class="stagger divide-y divide-hairline border-y border-hairline">
+        {
+          faq.map((item, i) => (
+            <details class="faq group" open={i === 0}>
+              <summary class="flex cursor-pointer list-none items-baseline justify-between gap-6 py-4 marker:content-none">
+                <span class="text-body font-medium transition-colors group-hover:text-accent">
+                  {item.q}
+                </span>
+                <span
+                  class="relative mt-1.5 block h-3 w-3 shrink-0 text-ink-muted"
+                  aria-hidden="true"
+                >
+                  <span class="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-current" />
+                  <span class="faq-bar absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-current" />
+                </span>
+              </summary>
+              <p class="max-w-[62ch] pb-5 text-ink-muted">{item.a}</p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </Container>
+</section>
+
+<style>
+  /* Artı → eksi: dikey çubuk kayboluyor */
+  .faq-bar {
+    transition: transform 220ms var(--ease-out-quiet);
+  }
+  .faq[open] .faq-bar {
+    transform: translateX(-50%) scaleY(0);
+  }
+  /* Safari'de summary'nin varsayılan üçgeni */
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .faq-bar {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,623 @@
+@import "tailwindcss";
+
+/* ===========================================================================
+   Tipografi — IBM Plex, self-host, latin + latin-ext
+   latin-ext altkümesi Türkçe için zorunlu: Ğ ğ İ ı Ş ş bu aralıkta.
+   Ü Ö Ç latin-1 içinde olduğundan `latin` altkümesinden gelir.
+   =========================================================================== */
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 700;
+  src: url("/fonts/ibm-plex-sans-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191,
+    U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 700;
+  src: url("/fonts/ibm-plex-sans-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191,
+    U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/ibm-plex-mono-latin-ext-400-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("/fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191,
+    U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("/fonts/ibm-plex-mono-latin-ext-600-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ===========================================================================
+   Tasarım token'ları
+   Bileşenler sabit değer yazmaz; her şey buradan gelir.
+   =========================================================================== */
+
+@theme {
+  /* --- Renk ------------------------------------------------------------
+     Vurgu rengi logodan örneklendi: #2CBC63.
+     Bu ton beyaz üzerinde 2,48:1 kontrast verir — metin için AA'yı geçmez.
+     Bu yüzden iki role ayrıldı:
+       brand   → yalnızca grafik (logo noktası, defter çubukları, koyu zemin)
+       accent  → metin ve aksiyon; aynı rengin koyu değeri, 6,36:1
+  --------------------------------------------------------------------- */
+  --color-canvas: #faf9f5; /* sıcak beyaz zemin */
+  --color-surface: #ffffff; /* kart, panel */
+  --color-wash: #f2f0ea; /* sessiz dolgu */
+  --color-ink: #1c1b18; /* ana metin — canvas üzerinde 16,2:1 */
+  --color-ink-muted: #6b6862; /* ikincil metin — canvas üzerinde 5,21:1 */
+  --color-hairline: #e6e3dc; /* 1px çizgi */
+
+  --color-brand: #2cbc63; /* logo yeşili — grafik rengi */
+  --color-accent: #0c6e37; /* aksiyon rengi — her iki yönde 6,36:1 */
+  --color-accent-hover: #0a5c2e;
+  --color-accent-wash: #ecf6f0;
+
+  /* --- v2 teması -------------------------------------------------------
+     Elektrik vurgu: logo yeşili SİYAH metinle kullanılıyor (8,48:1).
+     Ramp'in asit sarısı düğmesiyle aynı mantık — markanın tek parlak
+     rengini kısmak yerine tek bir yerde tam gücüyle kullanmak.
+  --------------------------------------------------------------------- */
+  --color-electric: #2cbc63;
+  --color-electric-hover: #27a957;
+  --color-void: #0b0b0c; /* v2 koyu zemin — mürekkepten daha derin */
+  --color-void-line: #26262a; /* koyu zeminde hairline */
+  --color-void-soft: #141416; /* koyu zeminde yükseltilmiş yüzey */
+  --color-paper: #fbfaf7; /* v2 zemin — çizgili defter kâğıdı */
+  --color-rule: #eae6dd; /* defter çizgisi, hairline'dan daha açık */
+  --color-sunk-soft: #f5f3ee; /* bölüm ritmini kırmak için bir ton aşağı */
+
+  /* Koyu panel (işlem defteri) — sayfadaki tek koyu bölge.
+     brand yeşili ink üzerinde 6,96:1 verir, yani orada metin olarak kullanılabilir. */
+  --color-ink-inverse: #faf9f5; /* koyu zeminde ana metin — 16,2:1 */
+  --color-ink-subtle: #9a968c; /* koyu zeminde ikincil metin — 5,83:1 */
+  --color-hairline-inverse: #35322c;
+
+  /* --- Tipografi ------------------------------------------------------- */
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Akışkan ölçek: mobil → masaüstü, ara değer yok */
+  --text-display: clamp(2.5rem, 1.6rem + 3.6vw, 4rem); /* 40 → 64 */
+  --text-display--line-height: 1.06;
+  --text-display--letter-spacing: -0.028em;
+
+  /* İç sayfa başlığı — ana sayfanın display'inden küçük.
+     Ana sayfadaki giriş anı tek kalsın diye kasıtlı olarak bir basamak aşağıda. */
+  --text-h1: clamp(2rem, 1.45rem + 2.2vw, 3rem); /* 32 → 48 */
+  --text-h1--line-height: 1.1;
+  --text-h1--letter-spacing: -0.025em;
+
+  --text-h2: clamp(1.75rem, 1.35rem + 1.6vw, 2.25rem); /* 28 → 36 */
+  --text-h2--line-height: 1.14;
+  --text-h2--letter-spacing: -0.021em;
+
+  --text-h3: 1.25rem; /* 20 */
+  --text-h3--line-height: 1.35;
+  --text-h3--letter-spacing: -0.012em;
+
+  --text-body: 1.0625rem; /* 17 */
+  --text-body--line-height: 1.62;
+
+  --text-small: 0.875rem; /* 14 */
+  --text-small--line-height: 1.55;
+
+  --text-label: 0.75rem; /* 12 — mono, versal */
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.085em;
+
+  /* Defter rakamları */
+  --text-figure: clamp(2rem, 1.3rem + 2.8vw, 3.25rem); /* 32 → 52 */
+  --text-figure--line-height: 1;
+  --text-figure--letter-spacing: -0.02em;
+
+  --text-figure-total: clamp(2.75rem, 1.7rem + 4.2vw, 4.5rem); /* 44 → 72 */
+  --text-figure-total--line-height: 1;
+  --text-figure-total--letter-spacing: -0.028em;
+
+  /* v2: referans sitelerin hepsinde başlık bundan çok daha büyük.
+     Mercury 56, Ramp 60, Linear 64, Stripe 44 — hepsi sıkı tracking'le. */
+  --text-mega: clamp(2.75rem, 1.1rem + 6.6vw, 5.5rem); /* 44 → 88 */
+  --text-mega--line-height: 0.98;
+  --text-mega--letter-spacing: -0.035em;
+
+  --text-lead: clamp(1.125rem, 1rem + 0.5vw, 1.375rem); /* 18 → 22 */
+  --text-lead--line-height: 1.5;
+  --text-lead--letter-spacing: -0.011em;
+
+  /* Şerit ve rozet etiketleri — Ramp'teki chip'lerin karşılığı */
+  --text-chip: 0.6875rem; /* 11 */
+  --text-chip--line-height: 1;
+  --text-chip--letter-spacing: 0.06em;
+
+  /* --- Ritim ----------------------------------------------------------- */
+  --spacing-section: clamp(5rem, 3.2rem + 7.2vw, 9rem); /* 80 → 144 */
+  --spacing-gutter: clamp(1.25rem, 0.5rem + 3vw, 3rem); /* 20 → 48 */
+
+  /* Referans ölçüler (1440px ekranda içerik sütunu):
+     Ramp ~1312 · Linear ~1300 · Stripe ~1264. Önceki 72rem/1152 bugün dar
+     kalıyordu; 82rem Ramp'le aynı genişlik. */
+  --container-page: 82rem; /* 1312 */
+  --container-text: 40rem; /* 640 — okunabilir satır uzunluğu */
+
+  /* --- Yüzey ----------------------------------------------------------- */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+
+  /* Gölgeler bilinçli olarak çok sessiz; derinlik hairline ile kuruluyor */
+  --shadow-raise: 0 1px 2px rgb(28 27 24 / 0.04), 0 8px 24px -12px rgb(28 27 24 / 0.12);
+  --shadow-frame: 0 1px 1px rgb(28 27 24 / 0.03), 0 18px 48px -24px rgb(28 27 24 / 0.18);
+
+  /* --- Hareket ----------------------------------------------------------
+     Yay/zıplama yok. Ürün bir ölçüm aleti; hareket de mekanik olmalı:
+     hızlı başlayıp sakin duran tek yönlü bir eğri.
+  --------------------------------------------------------------------- */
+  --ease-out-quiet: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-precise: cubic-bezier(0.16, 0.84, 0.44, 1);
+  /* 620ms çok kısaydı: sayfa açılışında göz oturmadan animasyon bitiyordu.
+     Mesafe de 14px'ten 24px'e çıktı — hareketin fark edilmesi için gerekli. */
+  --dur-rise: 840ms;
+  --dur-line: 920ms;
+  --rise-travel: 24px;
+}
+
+/* ===========================================================================
+   Temel katman
+   =========================================================================== */
+
+@layer base {
+  :root {
+    /* Header + üstündeki şeritlerin toplam yüksekliği.
+       Header betiği gerçek değeri ölçüp günceller; bu yalnızca
+       betik çalışmadan önceki ilk boyama için makul bir tahmin. */
+    --top-stack: 126px;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Rakamlar her yerde hizalı: defterde, tabloda, fiyatta */
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+
+  /* Odak her zaman görünür ve tek tip */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Koyu panel içinde odak halkası zeminde kaybolmasın */
+  .on-ink :focus-visible {
+    outline-color: var(--color-brand);
+  }
+
+  ::selection {
+    background-color: var(--color-accent-wash);
+    color: var(--color-ink);
+  }
+
+  :where(h1, h2, h3, h4) {
+    text-wrap: balance;
+  }
+
+  :where(p) {
+    text-wrap: pretty;
+  }
+
+  /* Tarayıcı varsayılanı yerine token'lı çizgi */
+  :where(hr) {
+    border-color: var(--color-hairline);
+  }
+}
+
+/* ===========================================================================
+   Hareket — az ve amaçlı.
+   Sayfa açılışı ve defter bölümü dışında animasyon yok.
+   =========================================================================== */
+
+@layer utilities {
+  /* ---------------------------------------------------------------------
+     v2 — zemin dokusu.
+
+     Referans sitelerin hiçbirinde zemin düz beyaz değil: Ramp nokta ızgara,
+     Stripe gradyan şerit + görünür konteyner çizgileri kullanıyor.
+     Segika için seçtiğim doku defter kâğıdı: 32px'de bir yatay çizgi.
+     Muhasebe/SGK ürününe ait, kopya değil.
+  --------------------------------------------------------------------- */
+  /**
+   * Zemin dokusu — ince nokta ızgara.
+   *
+   * Önceki çizgili defter dokusu fazla baskındı ve "çizgili kağıt" gibi
+   * okunuyordu. Nokta ızgara aynı işi daha sessiz yapıyor: zemine ölçülmüş
+   * bir düzen katıyor, metnin altından geçerken okumayı hiç bölmüyor.
+   * Segika'nın işine de daha yakın — her nokta bir kayıt, ızgara bir sicil
+   * tablosu gibi okunuyor.
+   */
+  .ruled {
+    background-color: var(--color-paper);
+    background-image: radial-gradient(rgb(28 27 24 / 0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  /**
+   * Koyu hero bölgesi.
+   *
+   * Düz siyah yerine çok hafif bir ışık katmanı: sol üstten gelen, marka
+   * yeşilinden türetilmiş bir aydınlanma. Gradyan "mor-mavi" değil, tek
+   * renk ve neredeyse fark edilmez — zemine derinlik katıyor, dikkat
+   * çekmiyor. Üstüne defter çizgisi dokusu biniyor.
+   */
+  /* Zemin ve nokta ızgara. Işık katmanı, işlem kütüğü ve vinyet
+     HeroBackdrop bileşeninde — ikisi üst üste binmesin diye burada yok. */
+  .hero-dark {
+    background-color: var(--color-void);
+    background-image: radial-gradient(rgb(250 249 245 / 0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  /* Sayfa çerçevesinin koyu karşılığı */
+  .framed-dark {
+    position: relative;
+  }
+  .framed-dark::before,
+  .framed-dark::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgb(250 249 245 / 0.09);
+    pointer-events: none;
+  }
+  .framed-dark::before {
+    left: 0;
+  }
+  .framed-dark::after {
+    right: 0;
+  }
+
+  /* Koyu bölümde aynı nokta ızgara, zemine göre ayarlı */
+  .ruled-void {
+    background-color: var(--color-void);
+    background-image: radial-gradient(rgb(250 249 245 / 0.08) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  /**
+   * Sayfa çerçevesi — Stripe ve Ramp'te içerik sütununu işaretleyen dikey
+   * hairline'lar. "Mühendislik ürünü" hissini veren şey büyük ölçüde bu.
+   * Konteynerin iki yanına, sayfa boyunca uzanan iki çizgi koyar.
+   */
+  .framed {
+    position: relative;
+  }
+  .framed::before,
+  .framed::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--color-rule);
+    pointer-events: none;
+  }
+  .framed::before {
+    left: 0;
+  }
+  .framed::after {
+    right: 0;
+  }
+
+  /* Kırpma işareti — Ramp'in uçuşan arayüz parçalarındaki köşe nişanları */
+  .cropmarks::before,
+  .cropmarks::after {
+    content: '';
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border: 1px solid var(--color-ink);
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  /* Koyu zeminde nişanlar görünmez kalmasın */
+  .on-ink .cropmarks::before,
+  .on-ink .cropmarks::after {
+    border-color: var(--color-ink-inverse);
+    opacity: 0.3;
+  }
+  .cropmarks::before {
+    top: -4px;
+    left: -4px;
+    border-right: 0;
+    border-bottom: 0;
+  }
+  .cropmarks::after {
+    bottom: -4px;
+    right: -4px;
+    border-left: 0;
+    border-top: 0;
+  }
+
+  /* ---------------------------------------------------------------------
+     v2 — hareket.
+
+     Üç şey yapıyor, fazlası yok:
+       .rise      → görünür olunca bir kez yükselerek belir
+       .line-mask → başlık satırları maskenin altından çıkar
+       .scene     → ürün sahnesi sırayla kurulur ("sistem çalışıyor")
+
+     Hepsi tek yönlü ve tek seferlik. Geri sarma, döngü, parallax yok.
+     Yalnızca transform ve opacity kullanılıyor — düzen hiç oynamıyor.
+  --------------------------------------------------------------------- */
+
+  .rise {
+    opacity: 0;
+    transform: translateY(var(--rise-travel));
+    transition:
+      opacity var(--dur-rise) var(--ease-out-quiet),
+      transform var(--dur-rise) var(--ease-out-quiet);
+    transition-delay: var(--rise-delay, 0ms);
+    will-change: opacity, transform;
+  }
+  .rise.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /**
+   * Kademeli beliriş.
+   *
+   * Tek blok hâlinde beliren bir bölüm "animasyon" gibi okunmuyor — göz onu
+   * tek bir sıçrama olarak algılıyor. `.stagger` kapsayıcısının doğrudan
+   * çocukları sırayla gelir; hareket böylece bir akış hâline dönüşür.
+   *
+   * Gecikme JS ile değil, nth-child ile veriliyor: betik çalışmasa bile
+   * sıralama korunur ve her öğe için ayrı stil üretmek gerekmez.
+   */
+  .stagger > * {
+    opacity: 0;
+    transform: translateY(var(--rise-travel));
+    transition:
+      opacity var(--dur-rise) var(--ease-out-quiet),
+      transform var(--dur-rise) var(--ease-out-quiet);
+  }
+  .stagger.is-in > * {
+    opacity: 1;
+    transform: none;
+  }
+  .stagger.is-in > *:nth-child(1) { transition-delay: 0ms; }
+  .stagger.is-in > *:nth-child(2) { transition-delay: 90ms; }
+  .stagger.is-in > *:nth-child(3) { transition-delay: 180ms; }
+  .stagger.is-in > *:nth-child(4) { transition-delay: 270ms; }
+  .stagger.is-in > *:nth-child(5) { transition-delay: 360ms; }
+  .stagger.is-in > *:nth-child(6) { transition-delay: 450ms; }
+  .stagger.is-in > *:nth-child(n + 7) { transition-delay: 540ms; }
+
+  /* Başlık satırı maskesi: satır kendi yüksekliğinin altından yukarı kayar.
+     overflow-hidden kırpar, böylece metin "ortaya çıkmış" gibi görünür. */
+  .line-mask {
+    display: block;
+    overflow: hidden;
+    /* İnişli harfler (ğ, ş, y) maskeye takılmasın */
+    padding-bottom: 0.08em;
+    margin-bottom: -0.08em;
+  }
+  .line-mask > span {
+    display: block;
+    transform: translateY(105%);
+    transition: transform var(--dur-line) var(--ease-precise);
+    transition-delay: var(--line-delay, 0ms);
+  }
+  .is-in .line-mask > span {
+    transform: none;
+  }
+
+  /* Ürün sahnesi parçaları — sırayla belirir */
+  .scene-part {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+    transition:
+      opacity 680ms var(--ease-out-quiet),
+      transform 680ms var(--ease-out-quiet);
+    transition-delay: var(--part-delay, 0ms);
+  }
+  .scene.is-in .scene-part {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Tablo satırları yukarıdan aşağı dolar */
+  .scene-row {
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 460ms var(--ease-out-quiet),
+      transform 460ms var(--ease-out-quiet);
+    transition-delay: var(--row-delay, 0ms);
+  }
+  .scene.is-in .scene-row {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Vurgulanan kanun kodu rozeti en son yanar */
+  .scene-flash {
+    background-color: var(--color-wash);
+    color: var(--color-ink-muted);
+    transition:
+      background-color 420ms var(--ease-out-quiet),
+      color 420ms var(--ease-out-quiet);
+    transition-delay: var(--flash-delay, 0ms);
+  }
+  .scene.is-in .scene-flash {
+    background-color: var(--color-electric);
+    color: var(--color-ink);
+  }
+
+  /**
+   * Kart derinliği — üzerine gelince yükselir.
+   *
+   * Izgara `gap-px` ile hairline'ları paylaşıyor; kart yükselince komşusunun
+   * altında kalmaması için z-index de artıyor. Gölge kartın kendi rengiyle
+   * değil, nötr mürekkeple çiziliyor.
+   */
+  .lift {
+    position: relative;
+    z-index: 0;
+    transition:
+      transform 260ms var(--ease-out-quiet),
+      box-shadow 260ms var(--ease-out-quiet);
+  }
+  .lift:hover,
+  .lift:focus-visible {
+    z-index: 1;
+    transform: translateY(-3px);
+    box-shadow:
+      0 1px 2px rgb(11 11 12 / 0.05),
+      0 18px 40px -20px rgb(11 11 12 / 0.28);
+  }
+
+  /* Bento kartlarında köşe nişanları — hover'da beliriyor.
+     Ürün sahnesindeki kırpma işaretleriyle aynı dil. */
+  .tick-corners::before,
+  .tick-corners::after {
+    content: '';
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border: 1px solid var(--color-electric);
+    opacity: 0;
+    transition: opacity 220ms var(--ease-out-quiet);
+    pointer-events: none;
+  }
+  .tick-corners::before {
+    top: 10px;
+    left: 10px;
+    border-right: 0;
+    border-bottom: 0;
+  }
+  .tick-corners::after {
+    bottom: 10px;
+    right: 10px;
+    border-left: 0;
+    border-top: 0;
+  }
+  .tick-corners:hover::before,
+  .tick-corners:hover::after,
+  .tick-corners:focus-visible::before,
+  .tick-corners:focus-visible::after {
+    opacity: 1;
+  }
+
+  /* Açılışta yükselerek beliren öğe. Stagger için --reveal-delay ayarlanır. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: reveal 620ms var(--ease-out-quiet) forwards;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+
+  @keyframes reveal {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Hareketi kaldır ama son durumu koru — içerik asla gizli kalmasın.
+     Bu blok, gözlemci hiç çalışmasa bile her şeyin görünür olmasını garanti eder. */
+  .lift {
+    transition: none;
+  }
+
+  .reveal,
+  .rise,
+  .stagger > *,
+  .scene-part,
+  .scene-row {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  .line-mask > span {
+    transform: none !important;
+    transition: none !important;
+  }
+  .scene-flash {
+    background-color: var(--color-electric) !important;
+    color: var(--color-ink) !important;
+    transition: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

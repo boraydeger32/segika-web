@@ -1,0 +1,25 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ContentPage from '../../../components/ContentPage.astro';
+import { incentivePages } from '../../../data/content-pages';
+
+export function getStaticPaths() {
+  return incentivePages.map((page) => ({ params: { slug: page.slug }, props: { page } }));
+}
+
+const { page } = Astro.props;
+const siblings = incentivePages
+  .filter((p) => p.slug !== page.slug)
+  .map((p) => ({ label: p.title, href: `/sgk-tesvikleri/${p.slug}/` }));
+---
+
+<Base title={`${page.title} — Segika SGK Otomasyon Yazılımı`} description={page.description}>
+  <ContentPage
+    page={page}
+    eyebrow="SGK Teşvikleri"
+    crumbs={[{ label: 'SGK Teşvikleri', href: '/kategori/sgk-tesvikleri/' }, { label: page.title }]}
+    siblings={siblings}
+    siblingsLabel="Diğer SGK teşvikleri"
+    fallback={{ label: 'Tüm SGK teşviklerini görün', href: '/kategori/sgk-tesvikleri/' }}
+  />
+</Base>

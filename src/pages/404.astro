@@ -1,0 +1,74 @@
+---
+import { url } from '../lib/url';
+import Base from '../layouts/Base.astro';
+import Container from '../components/Container.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import Button from '../components/Button.astro';
+import { modulePages } from '../data/module-pages';
+
+const shortcuts = [
+  { label: 'Program özellikleri', href: '/kategori/program-ozellikleri/' },
+  { label: 'SGK İşveren Rehberi', href: '/kategori/sgk-isveren-rehberi/' },
+  { label: 'Danışmanlık hizmetleri', href: '/danismanlik-hizmetleri/' },
+  { label: 'Fiyatlandırma', href: '/program-ozellikleri/fiyatlandirma/' },
+  { label: 'İletişim', href: '/iletisim/' },
+];
+---
+
+<Base
+  title="Sayfa bulunamadı — Segika"
+  description="Aradığınız sayfa bulunamadı. Program özellikleri, rehber ve iletişim sayfalarına buradan ulaşabilirsiniz."
+>
+  <section class="border-b border-hairline">
+    <Container class="py-(--spacing-section)">
+      <div class="max-w-[42rem]">
+        <Eyebrow>404</Eyebrow>
+        <h1 class="mt-4 text-h1">Bu sayfa burada değil.</h1>
+        <p class="mt-6 text-ink-muted">
+          Adres değişmiş ya da sayfa kaldırılmış olabilir. Aşağıdan devam edebilirsiniz.
+        </p>
+        <div class="mt-9">
+          <Button href={url('/')} size="lg">Ana sayfaya dönün</Button>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <section class="border-b border-hairline">
+    <Container class="py-14">
+      <Eyebrow>Programlar</Eyebrow>
+      <ul class="mt-6 divide-y divide-hairline border-y border-hairline">
+        {
+          modulePages.map((module) => (
+            <li>
+              <a
+                href={url(`/${module.slug}/`)}
+                class="group grid gap-2 py-5 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:items-baseline lg:gap-10"
+              >
+                <span class="text-h3 font-medium group-hover:text-accent">{module.name}</span>
+                <span class="text-small text-ink-muted">{module.intro}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  </section>
+
+  <section>
+    <Container class="py-14">
+      <Eyebrow>Kısayollar</Eyebrow>
+      <ul class="mt-6 grid gap-x-10 border-t border-hairline sm:grid-cols-2 lg:grid-cols-3">
+        {
+          shortcuts.map((item) => (
+            <li class="border-b border-hairline">
+              <a href={url(item.href)} class="block py-4 text-small transition-colors hover:text-accent">
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  </section>
+</Base>

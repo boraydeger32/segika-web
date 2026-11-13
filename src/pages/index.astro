@@ -1,0 +1,350 @@
+---
+import { url } from '../lib/url';
+import Master from '../layouts/Master.astro';
+import Container from '../components/Container.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import Ticker from '../components/v2/Ticker.astro';
+import HeroBackdrop from '../components/v2/HeroBackdrop.astro';
+import ProductScene from '../components/v2/ProductScene.astro';
+import Ledger from '../components/Ledger.astro';
+import FlowDiagram from '../components/v2/FlowDiagram.astro';
+import Integrations from '../components/v2/Integrations.astro';
+import Sectors from '../components/v2/Sectors.astro';
+import PricingBand from '../components/v2/PricingBand.astro';
+import Faq from '../components/v2/Faq.astro';
+import { cta } from '../data/site';
+import { modules } from '../data/modules';
+import { services, featuredGuides } from '../data/services';
+
+/**
+ * Home — yarışma teslimi, 1/3.
+ *
+ * Amacı: ürünün tamamını tanıtmak ve ziyaretçiyi ücretsiz denemeye
+ * yönlendirmek. Geniş kapsamlı; Landing ve Services sayfalarından
+ * farkı burada — o ikisi tek bir işe odaklanır.
+ *
+ * Tasarım dili (üç sayfada ortak): koyu hero + defter çizgili açık gövde,
+ * elektrik yeşili tek vurgu, IBM Plex, görünür sayfa çerçevesi.
+ */
+
+/** Bento ızgarada hangi modül kaç hücre kaplasın. */
+const bento = modules.map((m, i) => ({
+  ...m,
+  // 3 sütunlu ızgarada öne çıkan 2×2 kaplar; kalan 5 modül tam oturur.
+  span: i === 0 ? 'lg:col-span-2 lg:row-span-2' : '',
+  feature: i === 0,
+}));
+---
+
+<Master
+  title="SGK Teşvik Programı ve SGK Otomasyon Programı — Segika"
+  description="Segika SGK otomasyon yazılımı; teşvik hesaplama, otomatik sağlık raporu onaylama, kimlik bildirimi, iş kazası takibi ve işkur bildirimi süreçlerini tek panelden yürütür."
+  headerTone="dark"
+>
+
+    {/* 1 · Duyuru şeridi — koyu bölgenin ilk katmanı */}
+    <div class="hero-dark on-ink" slot="pretop">
+      <Container class="flex items-center justify-center gap-3 py-2.5 text-center">
+        <p class="text-small text-ink-subtle">
+          Türkiye’nin en büyük SGK işlem hacmi — her ay 1,7 milyondan fazla çalışan
+        </p>
+      </Container>
+    </div>
+    {/* 2 · Hero — koyu blok, büyük başlık + kurgulanmış ürün sahnesi */}
+    <section
+    class="hero-dark on-ink relative flex flex-col overflow-hidden text-ink-inverse lg:min-h-[calc(100svh-var(--top-stack))]"
+  >
+    <HeroBackdrop />
+      <Ticker tone="dark" />
+      <Container class="framed-dark relative z-10 flex flex-1 flex-col justify-center">
+        <div class="grid gap-14 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)] lg:items-center lg:gap-20 lg:py-28">
+          <div class="stagger" style="--rise-delay: 60ms">
+            <p class="font-mono text-chip uppercase text-ink-subtle">SGK Otomasyon Yazılımı</p>
+            {/* max-width başlığın kendisinde: `ch` öğenin kendi punto'suna göre
+                hesaplandığı için kapsayıcıya verilince gövde boyutuna düşüyor.
+                Satırlar elle bölündü: maske animasyonu satır başına çalışıyor
+                ve bu üç satır her genişlikte doğal kırılmayla aynı. */}
+            <h1 class="mt-6 max-w-[11ch] text-mega">
+              <span class="line-mask"><span style="--line-delay: 120ms">SGK işleri</span></span>
+              <span class="line-mask"><span style="--line-delay: 200ms">kendi kendine</span></span>
+              <span class="line-mask"><span style="--line-delay: 280ms">yürüsün.</span></span>
+            </h1>
+            <p class="mt-7 max-w-[44ch] text-lead text-ink-subtle">
+              Teşvik hesaplamadan sağlık raporu onayına, kimlik bildiriminden işkur
+              çizelgesine kadar rutin SGK işlerini sistem sizin yerinize yapar.
+            </p>
+            <div class="mt-10 flex flex-wrap items-center gap-x-5 gap-y-4">
+              <a
+                href={cta.primary.href}
+                rel="noopener"
+                class="inline-flex items-center gap-2 rounded-md bg-electric px-6 py-3.5 font-medium text-ink transition-colors hover:bg-electric-hover"
+              >
+                {cta.primary.label}
+                <svg class="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path
+                    d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"></path>
+                </svg>
+              </a>
+              <a
+                href={cta.secondary.href}
+                rel="noopener"
+                class="rounded-md border border-void-line px-6 py-3.5 font-medium text-ink-inverse transition-colors hover:border-ink-subtle"
+              >
+                {cta.secondary.label}
+              </a>
+            </div>
+            <p class="mt-6 font-mono text-chip uppercase text-ink-subtle">
+              Kurulum yok · Kredi kartı istenmez
+            </p>
+          </div>
+
+          <div class="rise" style="--rise-delay: 200ms">
+            <ProductScene tone="dark" />
+          </div>
+      </div>
+    </Container>
+  </section>
+
+    {/* 3 · Entegrasyon şeridi — "mevcut düzenimi bozar mı" itirazı burada kapanıyor */}
+    <Integrations />
+
+    {/* 4 · Modüller — bento ızgara */}
+    <section aria-labelledby="v2-moduller">
+      <Container class="framed py-(--spacing-section)">
+        <div class="rise flex flex-wrap items-end justify-between gap-6">
+          <h2 id="v2-moduller" class="max-w-[16ch] text-h2">
+            Altı modül, tek panel, tek oturum.
+          </h2>
+          <a
+            href={url('/kategori/program-ozellikleri/')}
+            class="text-small font-medium text-accent underline decoration-from-font underline-offset-4"
+          >
+            Tümünü görün
+          </a>
+        </div>
+
+        <div class="stagger mt-12 grid gap-px overflow-hidden rounded-lg border border-hairline bg-hairline sm:grid-cols-2 lg:grid-cols-3">
+          {
+            bento.map((module) => (
+              <a
+                href={url(module.href)}
+                class:list={[
+                  'lift tick-corners group flex flex-col justify-between bg-surface p-6 transition-colors hover:bg-wash',
+                  module.span,
+                  module.feature ? 'lg:p-8' : '',
+                ]}
+              >
+                <div>
+                  <p class="font-mono text-chip uppercase text-ink-muted">{module.eyebrow}</p>
+                  <h3
+                    class:list={[
+                      'mt-3 font-medium',
+                      module.feature ? 'text-h2 max-w-[14ch]' : 'text-h3',
+                    ]}
+                  >
+                    {module.title}
+                  </h3>
+                  <p
+                    class:list={[
+                      'mt-3 text-ink-muted',
+                      module.feature ? 'max-w-[36ch]' : 'text-small',
+                    ]}
+                  >
+                    {module.summary}
+                  </p>
+                </div>
+
+                {/* Oran çubuğu yok: neyin yüzdesi olduğu belirsiz bir çubuk
+                    veri gibi görünüp okuyucuyu yanıltır. Rakam ve gerçek
+                    dipnot yeterli. */}
+                {module.feature && (
+                  <div class="mt-8 border-t border-hairline pt-5">
+                    <p class="font-mono text-chip uppercase text-ink-muted">
+                      Bu ay kazandırılan
+                    </p>
+                    <p class="mt-2 text-figure font-medium tabular-nums text-ink">
+                      360.000.000<span class="text-h3"> ₺</span>
+                    </p>
+                    <p class="mt-3 max-w-[34ch] font-mono text-[10px] leading-relaxed text-ink-muted">
+                      Yalnızca 6111, 3294 ve 2828 teşviklerinin toplamıdır.
+                    </p>
+                  </div>
+                )}
+
+                <span class="mt-6 inline-flex items-center gap-1.5 font-mono text-chip uppercase text-ink transition-colors group-hover:text-accent">
+                  {module.cta}
+                  <svg
+                    class="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+              </a>
+            ))
+          }
+        </div>
+      </Container>
+    </section>
+
+    {/* 5 · Akış şeması — ürünün ne yaptığını tek bakışta anlatır */}
+    <FlowDiagram />
+
+    {/* 6 · İşlem defteri — hâlâ sayfanın omurgası */}
+    <Ledger />
+
+    {/* 7 · Sektörler — gerçek sosyal kanıt */}
+    <Sectors />
+
+    {/* 8 · Fiyat bandı */}
+    <PricingBand />
+
+    {/* 9 · Danışmanlık — başlık yanda sabit kalır, kartlar yanından akar */}
+    <section class="border-t border-rule" aria-labelledby="v2-danismanlik">
+      <Container class="framed py-(--spacing-section)">
+        <div class="grid gap-10 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16">
+          <div class="rise lg:sticky lg:top-28 lg:self-start">
+            <Eyebrow>Danışmanlık</Eyebrow>
+            <h2 id="v2-danismanlik" class="mt-4 text-h2">
+              Yazılımın çözmediği yerde uzman desteği.
+            </h2>
+            <p class="mt-4 text-small text-ink-muted">
+              Üç ayrı alanda, SGK otomasyonunun kapsamadığı ama işverenin
+              sorumluluğunda kalan süreçler için.
+            </p>
+            <a
+              href={url('/danismanlik-hizmetleri/')}
+              class="mt-5 inline-block text-small font-medium text-accent underline decoration-from-font underline-offset-4"
+            >
+              Tüm hizmetler
+            </a>
+          </div>
+
+          <div class="stagger grid gap-px overflow-hidden rounded-lg border border-hairline bg-hairline">
+          {
+            services.map((service) => (
+              <a href={url(service.href)} class="lift tick-corners group bg-surface p-7 transition-colors hover:bg-wash">
+                <p class="font-mono text-chip tabular-nums text-ink-muted">{service.index}</p>
+                <h3 class="mt-4 text-h3 font-medium group-hover:text-accent">{service.title}</h3>
+                <p class="mt-3 text-small text-ink-muted">{service.summary}</p>
+                <ul class="mt-6 grid gap-x-8 gap-y-1.5 border-t border-hairline pt-4 sm:grid-cols-2">
+                  {service.highlights.slice(0, 4).map((item) => (
+                    <li class="flex gap-2.5 text-small text-ink-muted">
+                      <span
+                        class="mt-[0.62em] h-px w-2.5 shrink-0 bg-electric"
+                        aria-hidden="true"
+                      />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </a>
+            ))
+          }
+          </div>
+        </div>
+      </Container>
+    </section>
+
+    {/* 10 · Rehber */}
+    <section class="border-t border-rule" aria-labelledby="v2-rehber">
+      <Container class="framed py-(--spacing-section)">
+        <div class="rise flex flex-wrap items-end justify-between gap-6">
+          <h2 id="v2-rehber" class="max-w-[18ch] text-h2">
+            Yükümlülükleri bilmek, cezadan ucuzdur.
+          </h2>
+          <a
+            href={url('/kategori/sgk-isveren-rehberi/')}
+            class="text-small font-medium text-accent underline decoration-from-font underline-offset-4"
+          >
+            Tüm rehber
+          </a>
+        </div>
+
+        <ul class="stagger mt-12 divide-y divide-hairline border-y border-hairline">
+          {
+            featuredGuides.map((guide) => (
+              <li>
+                <a
+                  href={url(guide.href)}
+                  class="group -mx-4 grid gap-2 rounded-md px-4 py-6 transition-colors hover:bg-surface lg:grid-cols-[7rem_minmax(0,24rem)_minmax(0,1fr)_auto] lg:items-baseline lg:gap-10"
+                >
+                  <span class="font-mono text-chip uppercase text-ink-muted">
+                    {guide.category}
+                  </span>
+                  <span class="text-h3 font-medium group-hover:text-accent">{guide.title}</span>
+                  <span class="text-small text-ink-muted">{guide.summary}</span>
+                  <svg
+                    class="hidden h-3.5 w-3.5 shrink-0 self-center text-ink-muted transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-accent lg:block"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </Container>
+    </section>
+
+    {/* 11 · Sıkça sorulanlar — son itirazlar burada kapanıyor */}
+    <Faq />
+
+    {/* 12 · Kapanış — koyu, defter dokusuyla */}
+    <section class="ruled-void border-t border-rule text-ink-inverse">
+      <Container class="py-(--spacing-section)">
+        <div class="stagger mx-auto max-w-[34rem] text-center">
+          <h2 class="text-h2">SGK işlerinizi bugün devredin.</h2>
+          <p class="mt-5 text-ink-subtle">
+            Her ay 20.000’den fazla firma bu panelden yönetiliyor. Hesabınızı açın,
+            sicillerinizi tanımlayın, sistem çalışmaya başlasın.
+          </p>
+          <ul
+            class="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-chip uppercase text-ink-subtle"
+          >
+            <li>Kurulum yok</li>
+            <li aria-hidden="true">·</li>
+            <li>Kredi kartı istenmez</li>
+            <li aria-hidden="true">·</li>
+            <li>Sınırsız sistem desteği</li>
+          </ul>
+          <div class="mt-10 flex flex-wrap justify-center gap-4">
+            <a
+              href={cta.primary.href}
+              rel="noopener"
+              class="rounded-md bg-electric px-6 py-3.5 font-medium text-ink transition-colors hover:bg-electric-hover"
+            >
+              {cta.primary.label}
+            </a>
+            <a
+              href={url('/iletisim/')}
+              class="rounded-md border border-void-line px-6 py-3.5 font-medium text-ink-inverse transition-colors hover:border-ink-subtle"
+            >
+              Bize ulaşın
+            </a>
+          </div>
+        </div>
+      </Container>
+    </section>
+</Master>

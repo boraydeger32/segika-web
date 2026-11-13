@@ -1,0 +1,25 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ContentPage from '../../../components/ContentPage.astro';
+import { legalPages } from '../../../data/content-pages';
+
+export function getStaticPaths() {
+  return legalPages.map((page) => ({ params: { slug: page.slug }, props: { page } }));
+}
+
+const { page } = Astro.props;
+const siblings = legalPages
+  .filter((p) => p.slug !== page.slug)
+  .map((p) => ({ label: p.title, href: `/kurallar/${p.slug}/` }));
+---
+
+<Base title={`${page.title} — Segika`} description={page.description}>
+  <ContentPage
+    page={page}
+    eyebrow="Kurallar"
+    crumbs={[{ label: page.title }]}
+    siblings={siblings}
+    siblingsLabel="Diğer yasal metinler"
+    fallback={{ label: 'İletişime geçin', href: '/iletisim/' }}
+  />
+</Base>

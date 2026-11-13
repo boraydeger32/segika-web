@@ -1,0 +1,64 @@
+---
+import { url } from '../lib/url';
+/**
+ * Tek aksiyon bileşeni.
+ * `primary` sayfada yalnızca bir kez, ana çağrı için kullanılır.
+ */
+interface Props {
+  href: string;
+  variant?: 'primary' | 'secondary' | 'quiet';
+  size?: 'md' | 'lg';
+  /**
+   * Köşe yarıçapı. `class` ile ezmek güvenilir değil — `rounded-md` ile
+   * `rounded-full` aynı özgüllükte olduğu için hangisinin kazanacağını
+   * Tailwind'in çıktı sırası belirliyor.
+   */
+  radius?: 'md' | 'full';
+  class?: string;
+  'aria-label'?: string;
+}
+
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  radius = 'md',
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const base =
+  'inline-flex items-center justify-center gap-2 font-medium ' +
+  'transition-colors duration-150 whitespace-nowrap';
+
+const radii = { md: 'rounded-md', full: 'rounded-full' };
+
+const sizes = {
+  md: 'px-5 py-2.5 text-body',
+  lg: 'px-6 py-3.5 text-body',
+};
+
+const variants = {
+  primary: 'btn-primary bg-accent text-canvas hover:bg-accent-hover',
+  secondary: 'border border-hairline bg-surface text-ink hover:border-ink-muted',
+  quiet: 'text-accent underline decoration-from-font underline-offset-4 hover:text-accent-hover',
+};
+
+/** Dış bağlantılarda yeni sekme + güvenli rel. */
+const isExternal = href.startsWith('http');
+---
+
+<a
+  href={url(href)}
+  class:list={[
+    base,
+    variant === 'quiet' ? '' : sizes[size],
+    variant === 'quiet' ? '' : radii[radius],
+    variants[variant],
+    className,
+  ]}
+  {...isExternal ? { rel: 'noopener' } : {}}
+  {...rest}
+>
+  <slot />
+</a>

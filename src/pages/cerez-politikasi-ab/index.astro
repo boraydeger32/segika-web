@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import ContentPage from '../../components/ContentPage.astro';
+import { legalPages } from '../../data/content-pages';
+
+const page = {
+  slug: 'cerez-politikasi-ab',
+  title: 'Çerez Politikası (AB)',
+  description:
+    'En iyi deneyimi sunmak için cihaz bilgilerini saklamak ve bunlara erişmek amacıyla çerez gibi teknolojiler kullanıyoruz. Bu politika, hangi çerezlerin hangi amaçla kullanıldığını açıklar.',
+};
+
+const siblings = legalPages.map((p) => ({ label: p.title, href: `/kurallar/${p.slug}/` }));
+---
+
+<Base title={`${page.title} — Segika`} description={page.description}>
+  <ContentPage
+    page={page}
+    eyebrow="Kurallar"
+    crumbs={[{ label: page.title }]}
+    siblings={siblings}
+    siblingsLabel="Diğer yasal metinler"
+    fallback={{ label: 'Çerez ayarlarını görün', href: '/kurallar/cerez-ayarlari/' }}
+  />
+</Base>

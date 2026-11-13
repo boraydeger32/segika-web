@@ -1,0 +1,49 @@
+---
+import { url } from '../../../lib/url';
+import Base from '../../../layouts/Base.astro';
+import Container from '../../../components/Container.astro';
+import PageHero from '../../../components/PageHero.astro';
+import Eyebrow from '../../../components/Eyebrow.astro';
+import CallToAction from '../../../components/CallToAction.astro';
+import { topics } from '../../../data/topics';
+
+export function getStaticPaths() {
+  return topics.map((topic) => ({ params: { slug: topic.slug }, props: { topic } }));
+}
+
+const { topic } = Astro.props;
+---
+
+<Base title={`${topic.label} — Segika SGK Otomasyon Yazılımı`} description={topic.description}>
+  <PageHero
+    eyebrow={topic.label}
+    headline={topic.headline}
+    intro={topic.description}
+    crumbs={[{ label: topic.label }]}
+  />
+
+  <section>
+    <Container class="py-(--spacing-section)">
+      <Eyebrow>Bu konudaki sayfalar</Eyebrow>
+      <ul class="mt-8 divide-y divide-hairline border-y border-hairline">
+        {
+          topic.entries.map((entry) => (
+            <li>
+              <a
+                href={url(entry.href)}
+                class="group grid gap-2 py-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:items-baseline lg:gap-10"
+              >
+                <span class="text-h3 font-medium text-ink group-hover:text-accent">
+                  {entry.title}
+                </span>
+                <span class="text-small text-ink-muted">{entry.description}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  </section>
+
+  <CallToAction tone="wash" />
+</Base>

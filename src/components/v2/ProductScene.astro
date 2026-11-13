@@ -1,0 +1,250 @@
+---
+/**
+ * Kurgulanmış ürün sahnesi.
+ *
+ * Ramp'in hero'sunda ham ekran görüntüsü yok: uçuşan arayüz parçaları,
+ * köşe nişanlarıyla bir sahne hâlinde dizilmiş. Segika için aynı yaklaşım
+ * iki sorunu birden çözüyor — boş gri kutu yerine gerçek bir görsel ağırlık,
+ * ve KVKK riski taşıyan ekran görüntülerine hiç dokunmadan.
+ *
+ * Veri seçimi kasıtlı: yalnızca kamuya açık kanun kodları (05510, 06111,
+ * 14857) ve toplam sayılar var. Kişi adı, TC Kimlik No, firma unvanı yok.
+ * Sahne bir ekran görüntüsü taklidi değil, arayüzün şeması — altındaki
+ * etiket bunu açıkça söylüyor.
+ *
+ * Hareket: sahne görünür olunca bir kez kurulur — satırlar dolar, toplam
+ * sayarak yükselir, hesaplanan teşvik rozeti yanar, sonra bildirimler düşer.
+ * Süslemek için değil, ürünün ne yaptığını üç saniyede anlatmak için.
+ */
+interface Props {
+  class?: string;
+  /** Koyu hero içinde kullanıldığında yüzeyler ve çizgiler ters çevrilir. */
+  tone?: 'light' | 'dark';
+}
+const { class: className = '', tone = 'light' } = Astro.props;
+
+const dark = tone === 'dark';
+
+/* Tek yerde tanımlanan yüzey paleti — her düğümde koşul yazmamak için. */
+const t = {
+  panel: dark ? 'border-void-line bg-void-soft' : 'border-hairline bg-surface',
+  line: dark ? 'border-void-line' : 'border-hairline',
+  lineSoft: dark ? 'border-void-line/70' : 'border-hairline/70',
+  label: dark ? 'text-ink-subtle' : 'text-ink-muted',
+  value: dark ? 'text-ink-inverse' : 'text-ink',
+  muted: dark ? 'text-ink-subtle' : 'text-ink-muted',
+  chipIdle: dark ? 'bg-void text-ink-subtle' : 'bg-wash text-ink-muted',
+  note: dark ? 'border-void-line bg-void-soft' : 'border-hairline bg-surface',
+};
+
+const rows = [
+  { kanun: '05510', calisan: '174', tutar: '463.828,23' },
+  { kanun: '06111', calisan: '11', tutar: '109.008,63', highlight: true },
+  { kanun: '14857', calisan: '6', tutar: '33.106,46' },
+];
+
+/** Sıralama: panel → satırlar → toplam → rozet → bildirimler. */
+const ROW_START = 240;
+const ROW_STEP = 110;
+const TOTAL_DELAY = ROW_START + rows.length * ROW_STEP;
+const FLASH_DELAY = TOTAL_DELAY + 160;
+const NOTE_START = FLASH_DELAY + 340;
+---
+
+<div class:list={['scene relative', dark && 'on-ink', className]}>
+  {/* Ana panel — teşvik hesaplama özeti */}
+  <div
+    class:list={['scene-part cropmarks relative rounded-lg border shadow-frame', t.panel]}
+    style="--part-delay: 0ms"
+  >
+    <div class:list={['flex items-center justify-between gap-4 border-b px-5 py-3', t.line]}>
+      <p class:list={['font-mono text-chip uppercase', t.label]}>Teşvik hesaplama özeti</p>
+      <div class="flex items-center gap-2.5">
+        {/* "Temsilî" rozeti panelin içinde: sahnenin altında serbest bir
+            etiket olarak durduğunda uçuşan bildirimlerle çakışıyordu. */}
+        <span
+          class:list={[
+            'rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em]',
+            dark ? 'border-void-line text-ink-subtle' : 'border-hairline text-ink-muted',
+          ]}
+        >
+          Temsilî
+        </span>
+        <p class:list={['font-mono text-chip tabular-nums', t.label]}>06/2026</p>
+      </div>
+    </div>
+
+    <table class="w-full">
+      <thead>
+        <tr class:list={['border-b', t.line]}>
+          <th class:list={['px-5 py-2 text-left font-mono text-chip font-normal uppercase', t.label]}>
+            Kanun
+          </th>
+          <th class:list={['px-2 py-2 text-right font-mono text-chip font-normal uppercase', t.label]}>
+            Çalışan
+          </th>
+          <th class:list={['px-5 py-2 text-right font-mono text-chip font-normal uppercase', t.label]}>
+            Hesaplanan
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          rows.map((row, i) => (
+            <tr
+              class:list={['scene-row border-b', t.lineSoft]}
+              style={`--row-delay: ${ROW_START + i * ROW_STEP}ms`}
+            >
+              <td class="px-5 py-2.5">
+                <span
+                  class:list={[
+                    'rounded-sm px-1.5 py-0.5 font-mono text-chip tabular-nums',
+                    row.highlight ? 'scene-flash' : t.chipIdle,
+                  ]}
+                  style={row.highlight ? `--flash-delay: ${FLASH_DELAY}ms` : undefined}
+                >
+                  {row.kanun}
+                </span>
+              </td>
+              <td class:list={['px-2 py-2.5 text-right font-mono text-chip tabular-nums', t.muted]}>
+                {row.calisan}
+              </td>
+              <td class:list={['px-5 py-2.5 text-right font-mono text-chip tabular-nums', t.value]}>
+                {row.tutar}
+              </td>
+            </tr>
+          ))
+        }
+        <tr class="scene-row" style={`--row-delay: ${TOTAL_DELAY}ms`}>
+          <td class:list={['px-5 py-3 font-mono text-chip uppercase', t.value]}>Toplam</td>
+          <td class:list={['px-2 py-3 text-right font-mono text-chip tabular-nums', t.value]}>191</td>
+          <td class:list={['px-5 py-3 text-right font-mono text-sm font-semibold tabular-nums', t.value]}>
+            <span class="js-scene-count" data-to="605943.32" data-display="605.943,32">
+              605.943,32
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  {/* Uçuşan parça 1 — otomatik rapor onayı */}
+  <div
+    class:list={['scene-part cropmarks absolute -right-6 -top-11 hidden w-[13rem] rounded-md border p-3 shadow-raise sm:block lg:-right-14', t.note]}
+    style={`--part-delay: ${NOTE_START}ms`}
+  >
+    <div class="flex items-start gap-2.5">
+      <span
+        class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-electric"
+        aria-hidden="true"
+      >
+        <svg class="h-2.5 w-2.5 text-ink" viewBox="0 0 12 12" fill="none">
+          <path
+            d="m2.5 6.2 2.3 2.3L9.5 3.8"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
+        </svg>
+      </span>
+      <div class="min-w-0">
+        <p class:list={['font-mono text-chip uppercase', t.value]}>Rapor onaylandı</p>
+        <p class:list={['mt-1 text-[11px] leading-snug', t.muted]}>SMS onayı olmadan, otomatik</p>
+      </div>
+    </div>
+  </div>
+
+  {/* Uçuşan parça 2 — kimlik bildirimi */}
+  <div
+    class:list={['scene-part cropmarks absolute -bottom-24 -left-6 hidden w-[12.5rem] rounded-md border p-3 shadow-raise sm:block lg:-left-16', t.note]}
+    style={`--part-delay: ${NOTE_START + 220}ms`}
+  >
+    <p class:list={['font-mono text-chip uppercase', t.label]}>Kimlik bildirimi</p>
+    <div class="mt-2 flex items-center gap-2">
+      <span class:list={['font-mono text-chip tabular-nums', t.value]}>SGK</span>
+      <svg class="h-2.5 w-6 text-electric" viewBox="0 0 24 10" fill="none" aria-hidden="true">
+        <path
+          d="M0 5h20m0 0-4-4m4 4-4 4"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+      </svg>
+      <span class:list={['font-mono text-chip uppercase', t.value]}>Emniyet</span>
+    </div>
+    <p class:list={['mt-2 text-[11px] leading-snug', t.muted]}>6 personel, aynı gün</p>
+  </div>
+
+  {/* Uçuşan parça 3 — iş kazası uyarısı */}
+  <div
+    class:list={[
+      'scene-part cropmarks absolute -bottom-14 right-0 hidden items-center gap-2 rounded-md border px-3 py-2 shadow-raise lg:flex',
+      dark ? 'border-transparent bg-electric' : 'border-void-line bg-void',
+    ]}
+    style={`--part-delay: ${NOTE_START + 440}ms`}
+  >
+    <span
+      class:list={['h-1.5 w-1.5 shrink-0 rounded-full', dark ? 'bg-ink' : 'bg-electric']}
+      aria-hidden="true"></span>
+    <p class:list={['font-mono text-chip uppercase', dark ? 'text-ink' : 'text-ink-inverse']}>
+      İş kazası · 3 gün kaldı
+    </p>
+  </div>
+</div>
+
+<script>
+  /**
+   * Toplam tutar, satırlar dolduktan sonra bir kez sayarak yükselir.
+   * Defter bölümündekiyle aynı ilke: metne ancak animasyon başlayacağı anda
+   * dokunulur, böylece hiç tetiklenmezse ziyaretçi doğru rakamı görür.
+   */
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const scene = document.querySelector<HTMLElement>('.scene');
+  const counter = scene?.querySelector<HTMLElement>('.js-scene-count');
+
+  if (scene && counter && !reduced.matches) {
+    const nf = new Intl.NumberFormat('tr-TR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    const to = Number(counter.dataset.to ?? 0);
+    const display = counter.dataset.display ?? '';
+
+    // Genişliği sabitle ki sayarken sütun oynamasın
+    counter.style.display = 'inline-block';
+    counter.style.minWidth = `${counter.getBoundingClientRect().width}px`;
+    counter.style.textAlign = 'right';
+
+    let started = false;
+    const run = () => {
+      if (started) return;
+      started = true;
+      const duration = 820;
+      const begin = performance.now();
+      const step = (now: number) => {
+        const t = Math.min(1, (now - begin) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        if (t < 1) {
+          counter.textContent = nf.format(to * eased);
+          requestAnimationFrame(step);
+        } else {
+          counter.textContent = display;
+        }
+      };
+      requestAnimationFrame(step);
+    };
+
+    // Toplam satırının sırası geldiğinde say — sahne kurulumuyla eşzamanlı
+    const TOTAL_ROW_DELAY = 700;
+    const watch = new MutationObserver(() => {
+      if (!scene.classList.contains('is-in')) return;
+      watch.disconnect();
+      setTimeout(run, TOTAL_ROW_DELAY);
+    });
+    watch.observe(scene, { attributes: true, attributeFilter: ['class'] });
+    if (scene.classList.contains('is-in')) {
+      watch.disconnect();
+      setTimeout(run, TOTAL_ROW_DELAY);
+    }
+  }
+</script>

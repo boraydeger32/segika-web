@@ -1,0 +1,89 @@
+---
+import Base from '../../layouts/Base.astro';
+import Container from '../../components/Container.astro';
+import PageHero from '../../components/PageHero.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import CallToAction from '../../components/CallToAction.astro';
+import { ledgerGroups, ledgerTotal } from '../../data/ledger';
+
+/**
+ * Hakkımızda.
+ * Giriş metni mevcut sitenin kendi açıklamasından; rakamlar defterden.
+ * Kuruluş yılı, ekip sayısı gibi doğrulayamadığım bilgiler yazılmadı.
+ */
+
+const figures = [
+  { display: ledgerTotal.display, suffix: ' ₺', label: 'Aylık kazandırılan teşvik' },
+  ...ledgerGroups[0].rows.map((r) => ({
+    display: r.display,
+    suffix: r.suffix ?? '',
+    label: `Aylık işlem — ${r.label.toLowerCase()}`,
+  })),
+];
+---
+
+<Base
+  title="Hakkımızda — Segika SGK Otomasyon Yazılımı"
+  description="Türkiye genelinde yüzlerce firma ve muhasebe ofisinin insan kaynakları süreçlerini dijitalleştirerek sektörde öncü konuma geldik."
+>
+  <PageHero
+    eyebrow="Hakkımızda"
+    headline="SGK işlerini|sistemin işi hâline getiriyoruz."
+    intro="Türkiye genelinde yüzlerce firma ve muhasebe ofisinin insan kaynakları süreçlerini dijitalleştirerek sektörde öncü konuma geldik."
+    crumbs={[{ label: 'Hakkımızda' }]}
+  />
+
+  <section class="border-b border-hairline" aria-label="Aylık işlem hacmi">
+    <Container class="py-12">
+      <Eyebrow>Aylık işlem hacmi</Eyebrow>
+      <dl class="mt-6 grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
+        {
+          figures.map((figure) => (
+            <div class="border-t border-hairline pt-4">
+              <dd class="text-h3 font-medium tabular-nums">
+                {figure.display}
+                <span aria-hidden="true">{figure.suffix}</span>
+              </dd>
+              <dt class="mt-1 font-mono text-label uppercase text-ink-muted">{figure.label}</dt>
+            </div>
+          ))
+        }
+      </dl>
+    </Container>
+  </section>
+
+  <section>
+    <Container class="py-(--spacing-section)">
+      <div class="grid gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
+        <div>
+          <Eyebrow>Ne yapıyoruz</Eyebrow>
+          <h2 class="mt-4 text-h2">İşin özeti</h2>
+        </div>
+        <div class="max-w-[62ch] space-y-5 text-ink-muted">
+          <p>
+            İş süreçlerinizi SGK ile ilgili operasyonlardan arındırıyoruz: otomatik
+            bildirimler, onaylar ve raporlarla rutin işler sizin yerinize sistem tarafından
+            yürütülür.
+          </p>
+          <p>
+            Sistem, insan hatasından kaynaklanan sapmaları en aza indirir ve rutin süreçleri
+            dakikalar içinde tamamlar. Bu sayede İK ve bordro ekipleri, günlük tekrarlayan
+            işler yerine stratejik projelere odaklanabilir.
+          </p>
+          <p>
+            Geleneksel ve zaman alıcı yöntemler yerine, yüksek teknolojili SGK otomasyon
+            sistemimizle hız, güvenlik ve verimliliği aynı platformda buluşturuyoruz. İş
+            dünyasının ihtiyaçlarına uygun olarak geliştirdiğimiz bu sistem, işverenlerin
+            yasal yükümlülüklerini kolaylıkla yerine getirmelerine imkân tanıyor.
+          </p>
+          <p>
+            Altyapı sağladığımız iş ortaklarımızla birlikte Türkiye’nin en büyük işlem
+            hacmini gerçekleştiriyoruz.
+          </p>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <CallToAction tone="wash" />
+</Base>

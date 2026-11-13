@@ -1,0 +1,28 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ContentPage from '../../../components/ContentPage.astro';
+import { featurePages } from '../../../data/content-pages';
+
+export function getStaticPaths() {
+  return featurePages.map((page) => ({ params: { slug: page.slug }, props: { page } }));
+}
+
+const { page } = Astro.props;
+const siblings = featurePages
+  .filter((p) => p.slug !== page.slug)
+  .map((p) => ({ label: p.title, href: `/program-ozellikleri/${p.slug}/` }));
+---
+
+<Base title={`${page.title} — Segika SGK Otomasyon Yazılımı`} description={page.description}>
+  <ContentPage
+    page={page}
+    eyebrow="Program Özellikleri"
+    crumbs={[
+      { label: 'Program Özellikleri', href: '/kategori/program-ozellikleri/' },
+      { label: page.title },
+    ]}
+    siblings={siblings}
+    siblingsLabel="Diğer program özellikleri"
+    fallback={{ label: 'Program özelliklerinin tamamını görün', href: '/kategori/program-ozellikleri/' }}
+  />
+</Base>

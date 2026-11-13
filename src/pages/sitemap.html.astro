@@ -1,0 +1,116 @@
+---
+import { url } from '../lib/url';
+/**
+ * HTML site haritası.
+ * Mevcut sitede /sitemap.html adresi var; korunuyor.
+ * Liste tek kaynaktan — veri modülleri — üretiliyor, elle güncellenmez.
+ */
+import Base from '../layouts/Base.astro';
+import Container from '../components/Container.astro';
+import PageHero from '../components/PageHero.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import { modulePages } from '../data/module-pages';
+import { consultingPages } from '../data/consulting-pages';
+import { featurePages, guidePages, incentivePages, legalPages } from '../data/content-pages';
+import { topics } from '../data/topics';
+
+const groups = [
+  {
+    label: 'Genel',
+    links: [
+      { label: 'Ana sayfa', href: '/' },
+      { label: 'Hakkımızda', href: '/hakkimizda/' },
+      { label: 'İletişim', href: '/iletisim/' },
+      { label: 'Fiyatlandırma', href: '/program-ozellikleri/fiyatlandirma/' },
+      { label: 'Duyurular', href: '/duyurular/' },
+      { label: 'Blog', href: '/blog/' },
+    ],
+  },
+  {
+    label: 'Programlar',
+    links: modulePages.map((m) => ({ label: m.name, href: `/${m.slug}/` })),
+  },
+  {
+    label: 'Program özellikleri',
+    links: [
+      { label: 'Tüm program özellikleri', href: '/kategori/program-ozellikleri/' },
+      ...featurePages.map((p) => ({
+        label: p.title,
+        href: `/program-ozellikleri/${p.slug}/`,
+      })),
+    ],
+  },
+  {
+    label: 'Danışmanlık hizmetleri',
+    links: [
+      { label: 'Danışmanlık Hizmetleri', href: '/danismanlik-hizmetleri/' },
+      ...consultingPages.map((p) => ({ label: p.name, href: `/danismanlik/${p.slug}/` })),
+    ],
+  },
+  {
+    label: 'SGK İşveren Rehberi',
+    links: [
+      { label: 'Rehberin tamamı', href: '/kategori/sgk-isveren-rehberi/' },
+      ...guidePages.map((p) => ({ label: p.title, href: `/sgk-isveren-rehberi/${p.slug}/` })),
+    ],
+  },
+  {
+    label: 'SGK Teşvikleri',
+    links: [
+      { label: 'Tüm teşvikler', href: '/kategori/sgk-tesvikleri/' },
+      ...incentivePages.map((p) => ({ label: p.title, href: `/sgk-tesvikleri/${p.slug}/` })),
+    ],
+  },
+  {
+    label: 'Konular',
+    links: topics.map((t) => ({ label: t.label, href: `/konu/${t.slug}/` })),
+  },
+  {
+    label: 'Kurallar',
+    links: [
+      ...legalPages.map((p) => ({ label: p.title, href: `/kurallar/${p.slug}/` })),
+      { label: 'Çerez Politikası (AB)', href: '/cerez-politikasi-ab/' },
+    ],
+  },
+];
+
+const total = groups.reduce((sum, g) => sum + g.links.length, 0);
+---
+
+<Base
+  title="Site Haritası — Segika SGK Otomasyon Yazılımı"
+  description="Segika internet sitesindeki tüm sayfaların listesi."
+>
+  <PageHero
+    eyebrow="Site haritası"
+    headline="Tüm sayfalar."
+    intro={`${total} sayfa, sekiz başlık altında.`}
+    crumbs={[{ label: 'Site Haritası' }]}
+  />
+
+  <section>
+    <Container class="py-(--spacing-section)">
+      <div class="grid gap-x-12 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          groups.map((group) => (
+            <div>
+              <Eyebrow>{group.label}</Eyebrow>
+              <ul class="mt-4 space-y-0.5 border-t border-hairline pt-3">
+                {group.links.map((link) => (
+                  <li>
+                    <a
+                      href={url(link.href)}
+                      class="-mx-2 block rounded-sm px-2 py-1.5 text-small text-ink-muted transition-colors hover:bg-wash hover:text-accent"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </Container>
+  </section>
+</Base>

@@ -1,0 +1,162 @@
+---
+import Container from './Container.astro';
+import Eyebrow from './Eyebrow.astro';
+import { ledgerIntro, ledgerGroups, ledgerTotal } from '../data/ledger';
+
+/**
+ * İşlem defteri — sayfadaki tek koyu bölüm ve tek cesur hamle.
+ *
+ * Kurgu gerçek bir muhasebe defteri gibi: solda mono etiket, sağda tabular
+ * rakam. Tüm rakamlar aynı sağ kenara hizalandığı ve tabular-nums kullanıldığı
+ * için basamaklar üst üste bir sütun oluşturur — ölçek buradan okunur.
+ * Son satır, defterdeki toplam satırı gibi çift çizgiyle ayrılır.
+ *
+ * Hareket: bölüm görünür olduğunda rakamlar bir kez sayarak yükselir.
+ * prefers-reduced-motion açıkken doğrudan son değer basılır.
+ */
+---
+
+<section class="on-ink bg-ink text-ink-inverse" aria-labelledby="defter-baslik">
+  <Container class="py-(--spacing-section)">
+    <div class="max-w-[46rem]">
+      <Eyebrow tone="inverse">{ledgerIntro.eyebrow}</Eyebrow>
+      <h2 id="defter-baslik" class="mt-4 text-h2">{ledgerIntro.title}</h2>
+      <p class="mt-4 text-ink-subtle">{ledgerIntro.body}</p>
+    </div>
+
+    {/* Defter, sayfa genişliğinden dar tutuluyor: etiketle rakam birbirinden
+        kopmasın, satır bir kitap sayfası gibi okunabilsin. */}
+    <div class="js-ledger mt-14 max-w-[52rem] lg:mt-20">
+      {/* Üç kademe: kapsam rakamları büyük, otomatik işlemler iki sütunlu
+          küçük ızgara, toplam en altta. Önceki hâlinde on satır aynı
+          ağırlıktaydı ve okuyucu dördüncü satırda ölçek hissini kaybediyordu. */}
+      {
+        ledgerGroups.map((group, gi) => (
+          <section class="mt-12 first:mt-0" aria-label={group.caption}>
+            <p class="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-subtle">
+              {group.caption}
+            </p>
+            {gi === 0 ? (
+              <dl class="mt-4 border-t border-hairline-inverse">
+                {group.rows.map((row) => (
+                  <div class="grid grid-cols-[1fr_auto] items-baseline gap-x-6 border-b border-hairline-inverse py-5 sm:py-6">
+                    <dt class="min-w-0">
+                      <span class="block font-mono text-label uppercase text-ink-inverse">
+                        {row.label}
+                      </span>
+                      <span class="mt-1 block text-small text-ink-subtle">{row.note}</span>
+                    </dt>
+                    <dd class="text-figure font-medium text-brand">
+                      <span class="js-count tabular-nums" data-to={row.value} data-display={row.display}>
+                        {row.display}
+                      </span>
+                      {row.suffix && <span aria-hidden="true">{row.suffix}</span>}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <dl class="mt-4 grid gap-x-12 border-t border-hairline-inverse sm:grid-cols-2">
+                {group.rows.map((row) => (
+                  <div class="flex items-baseline justify-between gap-5 border-b border-hairline-inverse py-4">
+                    <dt class="min-w-0">
+                      <span class="block font-mono text-label uppercase text-ink-inverse">
+                        {row.label}
+                      </span>
+                      <span class="mt-0.5 block text-small text-ink-subtle">{row.note}</span>
+                    </dt>
+                    <dd class="text-h2 font-medium text-brand">
+                      <span class="js-count tabular-nums" data-to={row.value} data-display={row.display}>
+                        {row.display}
+                      </span>
+                      {row.suffix && <span aria-hidden="true">{row.suffix}</span>}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </section>
+        ))
+      }
+
+      {/* Toplam satırı — çift çizgi, daha büyük rakam */}
+      <section class="mt-12" aria-label="Toplam">
+        <div
+          class="border-t-[3px] border-double border-hairline-inverse pt-7"
+          style="border-top-style: double; border-top-width: 4px;"
+        >
+          <div class="grid grid-cols-1 items-baseline gap-x-6 gap-y-3 sm:grid-cols-[1fr_auto]">
+            <dl class="min-w-0">
+              <dt class="font-mono text-label uppercase text-ink-inverse">{ledgerTotal.label}</dt>
+              <dd class="mt-1 text-small text-ink-subtle">{ledgerTotal.note}</dd>
+            </dl>
+            <p class="text-figure-total font-medium text-brand sm:text-right">
+              <span class="js-count tabular-nums" data-to={ledgerTotal.value} data-display={ledgerTotal.display}>
+                {ledgerTotal.display}
+              </span><span aria-hidden="true">{ledgerTotal.suffix}</span>
+            </p>
+          </div>
+          <p class="mt-6 max-w-[58ch] font-mono text-[11px] leading-relaxed text-ink-subtle">
+            {ledgerTotal.footnote} · {ledgerIntro.period}
+          </p>
+        </div>
+      </section>
+    </div>
+  </Container>
+</section>
+
+<script>
+  /**
+   * Rakamları bir kez sayarak yükseltir.
+   * Türkçe binlik ayracı için Intl kullanılıyor; kaynak değer data-to'da.
+   */
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const ledger = document.querySelector('.js-ledger');
+  if (ledger && !reduced.matches) {
+    const nf = new Intl.NumberFormat('tr-TR');
+    const counters = Array.from(ledger.querySelectorAll<HTMLElement>('.js-count'));
+
+    // Genişliği baştan sabitle ki sayarken satır oynamasın.
+    // Metne DOKUNMA: gerçek rakam ekranda kalır. Sıfırlama yalnızca animasyon
+    // tam başlayacağı anda yapılır — böylece gözlemci hiç tetiklenmezse bile
+    // ziyaretçi "0" değil, doğru rakamı görür.
+    counters.forEach((el) => {
+      el.style.display = 'inline-block';
+      el.style.minWidth = `${el.getBoundingClientRect().width}px`;
+      el.style.textAlign = 'right';
+    });
+
+    const run = (el: HTMLElement) => {
+      const to = Number(el.dataset.to ?? 0);
+      const duration = 900;
+      const start = performance.now();
+      const step = (now: number) => {
+        const t = Math.min(1, (now - start) / duration);
+        // easeOutCubic — hızlı başlar, sakin biter
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = nf.format(Math.round(to * eased));
+        if (t < 1) requestAnimationFrame(step);
+        else el.textContent = el.dataset.display ?? nf.format(to);
+      };
+      requestAnimationFrame(step);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry, i) => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target as HTMLElement;
+          observer.unobserve(el);
+          // Satırlar sırayla kıpırdasın, hepsi aynı anda değil
+          setTimeout(() => {
+            el.textContent = nf.format(0);
+            run(el);
+          }, i * 60);
+        });
+      },
+      { threshold: 0.6 },
+    );
+
+    counters.forEach((el) => observer.observe(el));
+  }
+</script>

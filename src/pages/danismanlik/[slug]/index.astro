@@ -1,0 +1,92 @@
+---
+import { url } from '../../../lib/url';
+import Base from '../../../layouts/Base.astro';
+import Container from '../../../components/Container.astro';
+import PageHero from '../../../components/PageHero.astro';
+import Eyebrow from '../../../components/Eyebrow.astro';
+import Button from '../../../components/Button.astro';
+import CallToAction from '../../../components/CallToAction.astro';
+import { contact } from '../../../data/site';
+import { consultingPages } from '../../../data/consulting-pages';
+
+export function getStaticPaths() {
+  return consultingPages.map((page) => ({
+    params: { slug: page.slug },
+    props: { page },
+  }));
+}
+
+const { page } = Astro.props;
+const others = consultingPages.filter((p) => p.slug !== page.slug);
+---
+
+<Base title={page.seo.title} description={page.seo.description}>
+  <PageHero
+    eyebrow={`Danışmanlık · ${page.index}`}
+    headline={page.headline}
+    intro={page.intro}
+    crumbs={[
+      { label: 'Danışmanlık Hizmetleri', href: '/danismanlik-hizmetleri/' },
+      { label: page.name },
+    ]}
+  >
+    <div class="mt-9 flex flex-wrap items-center gap-x-6 gap-y-4">
+      <Button href={url('/iletisim/')} size="lg">Bize ulaşın</Button>
+      <Button href={contact.whatsapp.href} variant="quiet">WhatsApp’tan yazın</Button>
+    </div>
+  </PageHero>
+
+  <section aria-labelledby="kapsam-baslik">
+    <Container class="py-(--spacing-section)">
+      <div class="grid gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
+        <div>
+          <Eyebrow>Kapsam</Eyebrow>
+          <h2 id="kapsam-baslik" class="mt-4 text-h2">Hizmet kalemleri</h2>
+          <p class="mt-4 max-w-[38ch] text-small text-ink-muted">{page.audience}</p>
+        </div>
+
+        {/* Numaralı liste — kart ızgarası değil, hairline ile ayrılmış satırlar */}
+        <ol class="grid gap-x-10 border-t border-hairline sm:grid-cols-2">
+          {
+            page.items.map((item, i) => (
+              <li class="flex items-baseline gap-4 border-b border-hairline py-3.5">
+                <span class="shrink-0 font-mono text-[11px] tabular-nums text-ink-muted">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span class="text-small">{item}</span>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </Container>
+  </section>
+
+  <section class="border-t border-hairline bg-wash" aria-labelledby="diger-baslik">
+    <Container class="py-14 lg:py-16">
+      <Eyebrow>Diğer danışmanlık hizmetleri</Eyebrow>
+      <h2 id="diger-baslik" class="sr-only">Diğer danışmanlık hizmetleri</h2>
+      <ul class="mt-6 divide-y divide-hairline border-y border-hairline">
+        {
+          others.map((other) => (
+            <li>
+              <a
+                href={url(`/danismanlik/${other.slug}/`)}
+                class="group grid gap-2 py-5 lg:grid-cols-[3rem_minmax(0,22rem)_minmax(0,1fr)] lg:items-baseline lg:gap-8"
+              >
+                <span class="font-mono text-label text-ink-muted">{other.index}</span>
+                <span class="text-h3 font-medium group-hover:text-accent">{other.name}</span>
+                <span class="text-small text-ink-muted">{other.intro}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  </section>
+
+  <CallToAction
+    title="Durumunuzu konuşalım."
+    body="Hangi hizmetin size uygun olduğunu birlikte belirleyelim. Telefon veya WhatsApp ile doğrudan ulaşabilirsiniz."
+  />
+</Base>

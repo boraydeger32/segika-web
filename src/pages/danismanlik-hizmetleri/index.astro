@@ -1,0 +1,64 @@
+---
+import { url } from '../../lib/url';
+import Base from '../../layouts/Base.astro';
+import Container from '../../components/Container.astro';
+import PageHero from '../../components/PageHero.astro';
+import CallToAction from '../../components/CallToAction.astro';
+import { consultingPages } from '../../data/consulting-pages';
+---
+
+<Base
+  title="Danışmanlık Hizmetleri — Segika"
+  description="İş ve Sosyal Güvenlik Hukuku, İnsan Kaynakları Yönetimi, Personel Bulma ve İşe Alım danışmanlığı. Riskleri önceden tespit eder, süreci birlikte yönetiriz."
+>
+  <PageHero
+    eyebrow="Danışmanlık Hizmetleri"
+    headline="Yazılımın çözmediği yerde|uzman desteği."
+    intro="Üç ayrı alanda danışmanlık veriyoruz. Her biri, SGK otomasyonunun kapsamadığı ama işverenin sorumluluğunda kalan süreçleri kapsıyor."
+    crumbs={[{ label: 'Danışmanlık Hizmetleri' }]}
+  />
+
+  <section>
+    <Container class="py-(--spacing-section)">
+      <div class="divide-y divide-hairline border-y border-hairline">
+        {
+          consultingPages.map((service) => (
+            <article class="grid gap-6 py-12 lg:grid-cols-[auto_minmax(0,24rem)_minmax(0,1fr)] lg:gap-12">
+              <p class="font-mono text-label text-ink-muted lg:pt-1.5">{service.index}</p>
+              <div>
+                <h2 class="text-h3 font-medium">{service.name}</h2>
+                <p class="mt-3 text-small text-ink-muted">{service.intro}</p>
+                <a
+                  href={url(`/danismanlik/${service.slug}/`)}
+                  class="mt-4 inline-block text-small font-medium text-accent underline decoration-from-font underline-offset-4"
+                >
+                  Detayları inceleyin
+                </a>
+              </div>
+              <ul class="grid gap-x-8 gap-y-1.5 text-small text-ink-muted sm:grid-cols-2 lg:pt-1">
+                {service.items.slice(0, 6).map((item) => (
+                  <li class="flex gap-2.5">
+                    <span class="mt-[0.6em] h-px w-2.5 shrink-0 bg-hairline" aria-hidden="true" />
+                    {item.replace(' Danışmanlığı', '')}
+                  </li>
+                ))}
+                {service.items.length > 6 && (
+                  <li class="flex gap-2.5 text-ink-muted">
+                    <span class="mt-[0.6em] h-px w-2.5 shrink-0 bg-hairline" aria-hidden="true" />
+                    <span class="tabular-nums">+{service.items.length - 6} kalem daha</span>
+                  </li>
+                )}
+              </ul>
+            </article>
+          ))
+        }
+      </div>
+    </Container>
+  </section>
+
+  <CallToAction
+    title="Hangi hizmete ihtiyacınız olduğundan emin değil misiniz?"
+    body="Durumunuzu anlatın, size uygun olanı birlikte belirleyelim."
+    tone="wash"
+  />
+</Base>

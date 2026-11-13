@@ -1,0 +1,69 @@
+---
+/**
+ * Hareket sürücüsü.
+ *
+ * Tek bir IntersectionObserver, sayfadaki `.rise` ve `.scene` öğelerini
+ * görünür olduklarında bir kez işaretler. Geri sarma yok — bir kez beliren
+ * öğe bir daha kaybolmaz; aşağı yukarı kaydırırken yanıp sönmesin diye.
+ *
+ * Güvenlik ağı: JS hiç çalışmazsa veya gözlemci desteklenmezse `is-in`
+ * doğrudan basılır, içerik asla gizli kalmaz.
+ */
+---
+
+<script>
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  /** Öğeyi son durumuna getir. */
+  const settle = (el: Element) => el.classList.add('is-in');
+
+  const SELECTOR = '.rise, .stagger, .scene, .flow';
+
+  function start() {
+    const targets = Array.from(document.querySelectorAll<HTMLElement>(SELECTOR));
+    if (!targets.length) return;
+
+    // Hareket kapalıysa ya da gözlemci yoksa her şeyi hemen göster
+    if (reduced.matches || !('IntersectionObserver' in window)) {
+      targets.forEach(settle);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          settle(entry.target);
+          observer.unobserve(entry.target);
+        }
+      },
+      {
+        // Öğenin üst kenarı ekranın alt %10'unu geçince başlasın.
+        // Daha erken tetiklenirse animasyon kullanıcı oraya bakmadan biter.
+        rootMargin: '0px 0px -10% 0px',
+        threshold: 0,
+      },
+    );
+
+    targets.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.92) {
+        // Sayfa açıldığında zaten ekranda olanlar: iki kare bekle.
+        // Doğrudan sınıf basılırsa tarayıcı başlangıç durumunu hiç boyamaz
+        // ve geçiş atlanır — öğe birden belirir, hareket görünmez.
+        requestAnimationFrame(() => requestAnimationFrame(() => settle(el)));
+      } else {
+        observer.observe(el);
+      }
+    });
+  }
+
+  // Yazı tipleri yüklenmeden başlatma: satır maskeleri yanlış yükseklikte açılır
+  if (document.fonts?.ready) document.fonts.ready.then(start);
+  else start();
+
+  // Kullanıcı tercihini sonradan değiştirirse kalanları hemen göster
+  reduced.addEventListener('change', (e) => {
+    if (e.matches) document.querySelectorAll(SELECTOR).forEach(settle);
+  });
+</script>

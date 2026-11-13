@@ -1,0 +1,38 @@
+---
+import Container from './Container.astro';
+import Eyebrow from './Eyebrow.astro';
+import Breadcrumb from './Breadcrumb.astro';
+
+/**
+ * İç sayfaların üst bloğu.
+ *
+ * Ana sayfadaki hero'dan kasıtlı olarak daha sakin: tek sütun, görsel yok,
+ * daha küçük başlık. Ana sayfanın hero'su sayfadaki tek "giriş" anı olarak
+ * kalsın diye.
+ */
+interface Props {
+  eyebrow?: string;
+  /** `|` ile ayrılan parçalar ayrı satırlara düşer. */
+  headline: string;
+  intro?: string;
+  crumbs?: { label: string; href?: string }[];
+}
+
+const { eyebrow, headline, intro, crumbs } = Astro.props;
+const lines = headline.split('|').map((l) => l.trim());
+---
+
+<section class="border-b border-hairline">
+  <Container class="py-12 lg:py-16">
+    {crumbs && <Breadcrumb items={crumbs} />}
+
+    <div class:list={['reveal max-w-[52rem]', crumbs && 'mt-8']}>
+      {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+      <h1 class:list={['text-h1', eyebrow && 'mt-4']}>
+        {lines.map((line) => <span class="block">{line}</span>)}
+      </h1>
+      {intro && <p class="mt-6 max-w-[60ch] text-ink-muted">{intro}</p>}
+      <slot />
+    </div>
+  </Container>
+</section>

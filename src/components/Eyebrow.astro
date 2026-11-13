@@ -1,0 +1,20 @@
+---
+/** Bölüm üstündeki küçük mono etiket. Sitenin ritmini kuran tekrar eden öğe. */
+interface Props {
+  /** Koyu panel içinde kullanıldığında renk değişir. */
+  tone?: 'default' | 'inverse';
+  class?: string;
+}
+
+const { tone = 'default', class: className = '' } = Astro.props;
+---
+
+<p
+  class:list={[
+    'font-mono text-label uppercase',
+    tone === 'inverse' ? 'text-ink-subtle' : 'text-ink-muted',
+    className,
+  ]}
+>
+  <slot />
+</p>

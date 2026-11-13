@@ -1,0 +1,33 @@
+---
+import { url } from '../lib/url';
+import Container from './Container.astro';
+import Button from './Button.astro';
+import { cta } from '../data/site';
+
+/** Her iç sayfanın kapanışı. Ana sayfadaki kapanışla aynı ritimde. */
+interface Props {
+  title?: string;
+  body?: string;
+  /** `wash` zeminli hâli, koyu defter panelinden sonra kullanılır. */
+  tone?: 'plain' | 'wash';
+}
+
+const {
+  title = 'SGK işlerinizi bugün devredin.',
+  body = 'Kurulum gerekmez. Hesabınızı açın, sicillerinizi tanımlayın, sistem çalışmaya başlasın.',
+  tone = 'plain',
+} = Astro.props;
+---
+
+<section class:list={['border-t border-hairline', tone === 'wash' && 'bg-wash']}>
+  <Container class="py-(--spacing-section)">
+    <div class="mx-auto max-w-[36rem] text-center">
+      <h2 class="text-h2">{title}</h2>
+      <p class="mt-4 text-ink-muted">{body}</p>
+      <div class="mt-9 flex flex-wrap justify-center gap-x-6 gap-y-4">
+        <Button href={cta.primary.href} size="lg">{cta.primary.label}</Button>
+        <Button href={url('/iletisim/')} variant="secondary" size="lg">Bize ulaşın</Button>
+      </div>
+    </div>
+  </Container>
+</section>

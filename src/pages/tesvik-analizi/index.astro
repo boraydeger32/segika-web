@@ -1,0 +1,359 @@
+---
+import { url } from '../../lib/url';
+import Master from '../../layouts/Master.astro';
+import Container from '../../components/Container.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import HeroBackdrop from '../../components/v2/HeroBackdrop.astro';
+import { cta, contact } from '../../data/site';
+import { incentivePages } from '../../data/content-pages';
+import { integrations } from '../../data/trust';
+
+/**
+ * Landing — yarışma teslimi, 3/3.
+ *
+ * Home ürünün tamamını tanıtır, Services hizmetleri karşılaştırır.
+ * Bu sayfa tek bir işi yapar: **kaçırılan teşviki** gündeme getirip
+ * ziyaretçiyi ücretsiz hesaba sokmak.
+ *
+ * Landing kuralları, Home'dan ayrıldığı yerler:
+ *  · Tek mesaj, tek teklif — modül anlatımı, danışmanlık, rehber yok
+ *  · Aynı CTA sayfa boyunca dört kez tekrar eder
+ *  · Omurga problem → kanıt → çözüm → itiraz → çağrı
+ *  · Çapraz gezinme yok; sayfa ziyaretçiyi dağıtmıyor
+ *
+ * Tüm rakamlar segika.com'dan; hesaplama örneği ürün ekranındaki gerçek
+ * kanun kodlarıyla kurgulandı ve "temsilî" olarak işaretlendi.
+ */
+
+/** Teşvik kaybının üç tipik sebebi — mevzuat gerçeklerinden. */
+const reasons = [
+  {
+    title: 'Hangi teşvike hak kazandığınızı bilmiyorsunuz',
+    body: 'Yürürlükte yedi ayrı teşvik var ve çoğu birbiriyle çakışıyor. Hangisinin daha avantajlı olduğu her ay, her personel için değişebiliyor.',
+  },
+  {
+    title: 'Manuel hesaplamada en yüksek olanı kaçırıyorsunuz',
+    body: 'Bir personel için 6111 ve 5510 aynı anda uygulanamaz. Elle yapılan seçimde çoğu zaman düşük olan işaretleniyor ve fark geri alınamıyor.',
+  },
+  {
+    title: 'Geçmiş dönem haklarınız emanette kalıyor',
+    body: 'Zamanında talep edilmeyen teşvik ve iade hakları sistemde bekliyor. Çoğu işletme bunların varlığından haberdar değil.',
+  },
+];
+
+/** Temsilî hesaplama — ürün ekranındaki gerçek kanun kodlarıyla. */
+const sample = {
+  rows: [
+    { kanun: '05510', label: '5 puanlık indirim', calisan: 174, tutar: '463.828,23' },
+    { kanun: '06111', label: 'Genç, kadın, mesleki belge', calisan: 11, tutar: '109.008,63' },
+    { kanun: '14857', label: 'Engelli istihdamı', calisan: 6, tutar: '33.106,46' },
+  ],
+  total: '605.943,32',
+  people: 191,
+};
+---
+
+<Master
+  title="SGK Teşvik Analizi — Hak Ettiğiniz Teşviki Alıyor musunuz? | Segika"
+  description="Yürürlükteki yedi SGK teşviki arasından işletmenize en yüksek kazancı sağlayanı Segika hesaplar. Ücretsiz hesapla kendi verinizle görün."
+  headerTone="dark"
+  bodyClass="ruled"
+>
+  {/* 1 · Hero — tek soru, tek teklif */}
+  <section
+    class="hero-dark on-ink relative flex flex-col overflow-hidden text-ink-inverse lg:min-h-[calc(100svh-var(--top-stack))]"
+  >
+    <HeroBackdrop />
+    <Container class="framed-dark relative z-10 flex flex-1 flex-col justify-center">
+      <div class="grid gap-14 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:items-center lg:gap-16 lg:py-24">
+        <div class="stagger">
+          <p class="inline-flex items-center gap-2 rounded-full border border-void-line px-3 py-1.5 font-mono text-chip uppercase text-ink-subtle">
+            <span class="h-1.5 w-1.5 rounded-full bg-electric" aria-hidden="true"></span>
+            Ücretsiz teşvik analizi
+          </p>
+          <h1 class="mt-6 max-w-[13ch] text-mega">
+            <span class="line-mask"><span style="--line-delay: 120ms">Hak ettiğiniz</span></span>
+            <span class="line-mask"><span style="--line-delay: 200ms">teşviki</span></span>
+            <span class="line-mask"><span style="--line-delay: 280ms">alıyor musunuz?</span></span>
+          </h1>
+          <p class="mt-7 max-w-[46ch] text-lead text-ink-subtle">
+            Yürürlükte yedi ayrı SGK teşviki var. Segika hepsini hesaplayıp
+            işletmenize en yüksek kazancı sağlayanı seçer — her ay, her personel için.
+          </p>
+          <div class="mt-10 flex flex-wrap items-center gap-x-5 gap-y-4">
+            <a
+              href={cta.primary.href}
+              rel="noopener"
+              class="inline-flex items-center gap-2 rounded-md bg-electric px-7 py-4 font-medium text-ink transition-colors hover:bg-electric-hover"
+            >
+              Ücretsiz hesabınızı açın
+              <svg class="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path
+                  d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"></path>
+              </svg>
+            </a>
+            <a
+              href={contact.gsm.href}
+              class="font-medium text-ink-inverse underline decoration-from-font underline-offset-4"
+            >
+              {contact.gsm.label}
+            </a>
+          </div>
+          <p class="mt-6 font-mono text-chip uppercase text-ink-subtle">
+            Kurulum yok · Kredi kartı istenmez · 5 dakikada hesap
+          </p>
+        </div>
+
+        {/* Tek rakam — sayfanın tezi */}
+        <div class="rise" style="--rise-delay: 200ms">
+          <div class="cropmarks relative rounded-lg border border-void-line bg-void-soft p-8 lg:p-10">
+            <p class="font-mono text-chip uppercase text-ink-subtle">
+              Segika kullanıcılarının aylık toplamı
+            </p>
+            <p class="mt-4 whitespace-nowrap text-[clamp(2.25rem,3.4vw,3.5rem)] font-medium leading-none tracking-[-0.03em] tabular-nums text-electric">
+              360.000.000<span class="text-[0.55em]"> ₺</span>
+            </p>
+            <p class="mt-4 text-small text-ink-subtle">
+              Her ay kazandırılan toplam teşvik. 20.000’den fazla firma,
+              61.000’den fazla sicil.
+            </p>
+            <p class="mt-6 border-t border-void-line pt-4 font-mono text-[10px] leading-relaxed text-ink-subtle">
+              Yalnızca 6111, 3294 ve 2828 teşviklerinin toplamıdır ·
+              2025 Temmuz ayı verileri
+            </p>
+          </div>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  {/* 2 · Problem — neden kaçırılıyor */}
+  <section class="border-b border-rule" aria-labelledby="neden-baslik">
+    <Container class="framed py-(--spacing-section)">
+      <div class="rise max-w-[44rem]">
+        <Eyebrow>Sorun</Eyebrow>
+        <h2 id="neden-baslik" class="mt-4 text-h2">
+          Teşvik çoğu zaman bilinçli olarak değil, farkında olunmadan kaçırılıyor.
+        </h2>
+      </div>
+
+      <div class="stagger mt-12 grid gap-px overflow-hidden rounded-lg border border-hairline bg-hairline lg:grid-cols-3">
+        {
+          reasons.map((r, i) => (
+            <div class="bg-surface p-7">
+              <p class="font-mono text-chip tabular-nums text-ink-muted">
+                {String(i + 1).padStart(2, '0')}
+              </p>
+              <h3 class="mt-4 text-h3 font-medium">{r.title}</h3>
+              <p class="mt-3 text-small text-ink-muted">{r.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </Container>
+  </section>
+
+  {/* 3 · Kanıt — temsilî hesaplama */}
+  <section class="border-b border-rule bg-sunk-soft" aria-labelledby="ornek-baslik">
+    <Container class="framed py-(--spacing-section)">
+      <div class="grid gap-12 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
+        <div class="rise min-w-0 lg:sticky lg:top-28 lg:self-start">
+          <Eyebrow>Nasıl görünüyor</Eyebrow>
+          <h2 id="ornek-baslik" class="mt-4 text-h2">191 çalışan, tek ekran.</h2>
+          <p class="mt-4 text-ink-muted">
+            Segika her kanun kodunu ayrı hesaplar, çakışanları eler ve en yüksek
+            tutarı seçer. Sonuç tek tabloda, dönem dönem raporlanabilir.
+          </p>
+          <a
+            href={cta.primary.href}
+            rel="noopener"
+            class="mt-6 inline-flex items-center gap-2 rounded-md bg-accent px-5 py-3 font-medium text-canvas transition-colors hover:bg-accent-hover"
+          >
+            Kendi verinizle deneyin
+          </a>
+        </div>
+
+        <div class="rise min-w-0">
+          <div class="overflow-hidden rounded-lg border border-hairline bg-surface shadow-frame">
+            <div class="flex items-center justify-between border-b border-hairline px-5 py-3">
+              <p class="font-mono text-chip uppercase text-ink-muted">Teşvik hesaplama özeti</p>
+              <p class="font-mono text-chip tabular-nums text-ink-muted">06/2026</p>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[32rem] text-small">
+                <thead>
+                  <tr class="border-b border-hairline">
+                    <th class="px-5 py-2.5 text-left font-mono text-chip font-normal uppercase text-ink-muted">
+                      Kanun
+                    </th>
+                    <th class="px-3 py-2.5 text-right font-mono text-chip font-normal uppercase text-ink-muted">
+                      Çalışan
+                    </th>
+                    <th class="px-5 py-2.5 text-right font-mono text-chip font-normal uppercase text-ink-muted">
+                      Hesaplanan
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    sample.rows.map((row) => (
+                      <tr class="border-b border-hairline/60">
+                        <td class="px-5 py-3">
+                          <span class="font-mono text-chip tabular-nums text-ink">{row.kanun}</span>
+                          <span class="mt-0.5 block text-[11px] text-ink-muted">{row.label}</span>
+                        </td>
+                        <td class="px-3 py-3 text-right font-mono text-chip tabular-nums text-ink-muted">
+                          {row.calisan}
+                        </td>
+                        <td class="px-5 py-3 text-right font-mono tabular-nums text-ink">
+                          {row.tutar}
+                        </td>
+                      </tr>
+                    ))
+                  }
+                  <tr class="bg-accent-wash">
+                    <td class="px-5 py-3.5 font-mono text-chip uppercase text-ink">
+                      Aylık toplam
+                    </td>
+                    <td class="px-3 py-3.5 text-right font-mono text-chip tabular-nums text-ink">
+                      {sample.people}
+                    </td>
+                    <td class="px-5 py-3.5 text-right font-mono font-semibold tabular-nums text-ink">
+                      {sample.total} ₺
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p class="mt-4 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-muted">
+            Temsilî veri · gerçek kanun kodlarıyla kurgulanmıştır
+          </p>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  {/* 4 · Kapsam — hangi teşvikler */}
+  <section class="border-b border-rule" aria-labelledby="kapsam-baslik">
+    <Container class="framed py-(--spacing-section)">
+      <div class="rise max-w-[44rem]">
+        <Eyebrow>Kapsam</Eyebrow>
+        <h2 id="kapsam-baslik" class="mt-4 text-h2">Yürürlükteki yedi teşvikin tamamı.</h2>
+        <p class="mt-4 text-ink-muted">
+          Program hepsini birlikte değerlendirir; çakışanlarda en yüksek
+          kazancı veren kodu seçer.
+        </p>
+      </div>
+
+      <ul class="stagger mt-12 grid gap-px overflow-hidden rounded-lg border border-hairline bg-hairline sm:grid-cols-2 lg:grid-cols-4">
+        {
+          incentivePages.map((inc) => (
+            <li>
+              <a
+                href={url(`/sgk-tesvikleri/${inc.slug}/`)}
+                class="group block h-full bg-surface p-5 transition-colors hover:bg-wash"
+              >
+                <p class="font-mono text-chip tabular-nums text-electric">
+                  {inc.title.split(' ')[0]}
+                </p>
+                <p class="mt-2.5 text-small font-medium group-hover:text-accent">
+                  {inc.title.replace(/^\d+\s/, '').replace(' SGK Teşvik', '')}
+                </p>
+                <p class="mt-2 line-clamp-3 text-[12.5px] leading-relaxed text-ink-muted">
+                  {inc.description}
+                </p>
+              </a>
+            </li>
+          ))
+        }
+        <li class="flex items-center justify-center bg-surface p-5">
+          <a
+            href={url('/kategori/sgk-tesvikleri/')}
+            class="text-small font-medium text-accent underline decoration-from-font underline-offset-4"
+          >
+            Tümünü inceleyin
+          </a>
+        </li>
+      </ul>
+    </Container>
+  </section>
+
+  {/* 5 · İtiraz kırma — landing'in kritik bölümü */}
+  <section class="border-b border-rule bg-sunk-soft" aria-labelledby="itiraz-baslik">
+    <Container class="framed py-(--spacing-section)">
+      <h2 id="itiraz-baslik" class="rise max-w-[30ch] text-h2">
+        Başlamadan önce aklınıza gelenler.
+      </h2>
+
+      <dl class="stagger mt-12 grid gap-x-16 gap-y-8 lg:grid-cols-2">
+        <div>
+          <dt class="text-h3 font-medium">Mevcut bordro programım ne olacak?</dt>
+          <dd class="mt-3 text-ink-muted">
+            {integrations.body} Mevcut düzeninizi değiştirmenize gerek yok.
+          </dd>
+        </div>
+        <div>
+          <dt class="text-h3 font-medium">Kurulum gerekiyor mu?</dt>
+          <dd class="mt-3 text-ink-muted">
+            Hayır. Web tabanlı çalışır; hesabınızı açıp sicillerinizi
+            tanımladığınız anda sistem çalışmaya başlar.
+          </dd>
+        </div>
+        <div>
+          <dt class="text-h3 font-medium">Mevzuat değişirse?</dt>
+          <dd class="mt-3 text-ink-muted">
+            Güncellemeleri biz yapıyoruz. Teşvik oranları ve kanun kodları
+            değiştiğinde sistem güncellenir, sizin bir şey yapmanız gerekmez.
+          </dd>
+        </div>
+        <div>
+          <dt class="text-h3 font-medium">Denemek için ödeme yapmam gerekiyor mu?</dt>
+          <dd class="mt-3 text-ink-muted">
+            Hayır. Ücretsiz hesap açıp kendi sicillerinizle hesaplama
+            yapabilirsiniz; kredi kartı istenmez.
+          </dd>
+        </div>
+      </dl>
+    </Container>
+  </section>
+
+  {/* 6 · Kapanış — tek çağrı, koyu */}
+  <section class="ruled-void text-ink-inverse">
+    <Container class="py-(--spacing-section)">
+      <div class="stagger mx-auto max-w-[36rem] text-center">
+        <Eyebrow tone="inverse" class="mx-auto">Son adım</Eyebrow>
+        <h2 class="mt-5 text-h2">
+          Kaçırdığınız teşvik varsa, bu ay görün.
+        </h2>
+        <p class="mt-5 text-ink-subtle">
+          Hesabınızı açın, sicillerinizi tanımlayın, ilk hesaplamanızı aynı gün alın.
+          Hiçbir şey kurmanız gerekmiyor.
+        </p>
+        <div class="mt-10 flex flex-wrap justify-center gap-4">
+          <a
+            href={cta.primary.href}
+            rel="noopener"
+            class="rounded-md bg-electric px-7 py-4 font-medium text-ink transition-colors hover:bg-electric-hover"
+          >
+            Ücretsiz hesabınızı açın
+          </a>
+          <a
+            href={contact.whatsapp.href}
+            rel="noopener"
+            class="rounded-md border border-void-line px-7 py-4 font-medium text-ink-inverse transition-colors hover:border-ink-subtle"
+          >
+            Önce konuşalım
+          </a>
+        </div>
+        <p class="mt-7 font-mono text-chip uppercase text-ink-subtle">
+          {contact.phone.label} · {contact.gsm.label}
+        </p>
+      </div>
+    </Container>
+  </section>
+</Master>

@@ -1,0 +1,28 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ContentPage from '../../../components/ContentPage.astro';
+import { guidePages } from '../../../data/content-pages';
+
+export function getStaticPaths() {
+  return guidePages.map((page) => ({ params: { slug: page.slug }, props: { page } }));
+}
+
+const { page } = Astro.props;
+const siblings = guidePages
+  .filter((p) => p.slug !== page.slug)
+  .map((p) => ({ label: p.title, href: `/sgk-isveren-rehberi/${p.slug}/` }));
+---
+
+<Base title={`${page.title} — SGK İşveren Rehberi · Segika`} description={page.description}>
+  <ContentPage
+    page={page}
+    eyebrow="SGK İşveren Rehberi"
+    crumbs={[
+      { label: 'SGK İşveren Rehberi', href: '/kategori/sgk-isveren-rehberi/' },
+      { label: page.title },
+    ]}
+    siblings={siblings}
+    siblingsLabel="Rehberin diğer konuları"
+    fallback={{ label: 'Rehberin tamamını görün', href: '/kategori/sgk-isveren-rehberi/' }}
+  />
+</Base>

@@ -1,0 +1,527 @@
+---
+import { url } from '../lib/url';
+import Button from './Button.astro';
+import { cta, programMenu, guideMenu } from '../data/site';
+
+/**
+ * Üst menü — "dinamik ada".
+ *
+ * İki durumu var ve aralarında yumuşak geçiş yapar:
+ *   · Sayfa üstünde  → tam konteyner genişliğinde, zeminsiz, düz. Sayfanın
+ *                      parçası gibi durur.
+ *   · Kaydırıldığında → daralır, köşeleri yuvarlanır, arkası bulanıklaşır ve
+ *                      gölgeyle sayfadan kopar. Kenarlardan ayrı yüzer.
+ *
+ * Teknik notlar:
+ *  · `sticky` kullanılıyor, `fixed` değil — böylece ara parçası gerekmiyor
+ *    ve kaydırmada içerik zıplamıyor.
+ *  · Başlığın dış yüksekliği her iki durumda sabit; yalnızca içteki ada
+ *    morph ediyor. Böylece altındaki içerik hiç oynamıyor.
+ *  · Mega menü panelleri adaya göre konumlanıyor (adanın kendisi `relative`),
+ *    yani ada daralınca panel de onunla hizalı kalıyor.
+ *
+ * Erişilebilirlik: mega menüler fare için hover, klavye için Enter ile açılır.
+ * Esc kapatır ve odağı tetikleyen düğmeye geri verir.
+ */
+
+interface Props {
+  /**
+   * `dark`: sayfa üstündeyken koyu hero'nun görsel devamı olur (koyu zemin,
+   * açık metin). Kaydırılınca her iki temada da aynı açık kapsüle döner —
+   * o noktada arkasındaki içerik zaten açık zeminli.
+   */
+  tone?: 'light' | 'dark';
+}
+const { tone = 'light' } = Astro.props;
+
+const panels = [
+  { id: 'programlar', label: 'Program Özellikleri', columns: programMenu },
+  { id: 'rehber', label: 'SGK İşveren Rehberi', columns: guideMenu },
+];
+
+/** Mobilde mega menülerin düz hâli. Danışmanlık ayrı bir açılır menü
+    değil; Hizmetler sayfası zaten üç hizmeti de kapsıyor. */
+const mobilePanels = panels;
+---
+
+<header
+  id="site-header"
+  class="sticky top-0 z-50 py-2.5 lg:py-3"
+  data-scrolled="false"
+  data-tone={tone}
+>
+  <div
+    class="island relative mx-auto flex h-14 items-center justify-between gap-4 border border-transparent px-4 sm:px-5 lg:h-15"
+  >
+    <a href={url('/')} class="shrink-0" aria-label="Segika ana sayfa">
+      <img
+        src={url('/brand/segika-wordmark.png')}
+        alt="Segika"
+        width="130"
+        height="40"
+        class="logo-light h-[21px] w-auto lg:h-[23px]"
+      />
+      <img
+        src={url('/brand/segika-wordmark-dark.png')}
+        alt=""
+        aria-hidden="true"
+        width="130"
+        height="40"
+        class="logo-dark h-[21px] w-auto lg:h-[23px]"
+      />
+    </a>
+
+    <!-- Masaüstü gezinme -->
+    <nav class="hidden min-[1080px]:block" aria-label="Ana menü">
+      <ul class="flex items-center gap-0.5">
+        {
+          panels.map((panel) => (
+            <li class="js-menu-item">
+              <button
+                type="button"
+                class="js-menu-trigger flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-small text-ink transition-colors hover:bg-ink/5 aria-expanded:bg-ink/5 aria-expanded:text-accent"
+                aria-expanded="false"
+                aria-controls={`panel-${panel.id}`}
+              >
+                {panel.label}
+                <svg
+                  class="h-3 w-3 transition-transform duration-200"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M3 4.5 6 7.5 9 4.5"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+
+              {/* Panel adaya yaslanıyor: ada daraldığında panel de onunla hizalı kalır */}
+              <div
+                id={`panel-${panel.id}`}
+                class="js-menu-panel invisible absolute inset-x-0 top-full z-10 pt-3 opacity-0"
+              >
+                <div class="rounded-2xl border border-hairline bg-surface p-8 shadow-frame">
+                  <div class="grid gap-x-10 gap-y-9 min-[1080px]:grid-cols-3">
+                    {panel.columns.map((column) => (
+                      <div class="space-y-7">
+                        {column.map((group) => (
+                          <div>
+                            <p class="font-mono text-label uppercase text-ink-muted">
+                              {group.label}
+                            </p>
+                            <ul class="mt-3 space-y-0.5">
+                              {group.links.map((link) => (
+                                <li>
+                                  <a
+                                    href={url(link.href)}
+                                    class="-mx-2 block rounded-md px-2 py-1.5 text-small text-ink transition-colors hover:bg-wash hover:text-accent"
+                                  >
+                                    {link.label}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </li>
+          ))
+        }
+
+        <li>
+          <a
+            href={url('/hizmetler/')}
+            class="block whitespace-nowrap rounded-full px-3 py-2 text-small text-ink transition-colors hover:bg-ink/5"
+          >
+            Hizmetler
+          </a>
+        </li>
+        <li>
+          <a
+            href={url('/program-ozellikleri/fiyatlandirma/')}
+            class="block whitespace-nowrap rounded-full px-3 py-2 text-small text-ink transition-colors hover:bg-ink/5"
+          >
+            Fiyatlandırma
+          </a>
+        </li>
+        <li>
+          <a
+            href={url('/iletisim/')}
+            class="block whitespace-nowrap rounded-full px-3 py-2 text-small text-ink transition-colors hover:bg-ink/5"
+          >
+            İletişim
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="hidden shrink-0 items-center gap-1.5 min-[1080px]:flex">
+      <a
+        href={cta.secondary.href}
+        rel="noopener"
+        class="whitespace-nowrap rounded-full px-3 py-2 text-small font-medium text-ink transition-colors hover:bg-ink/5"
+      >
+        {cta.secondary.label}
+      </a>
+      <Button href={cta.primary.href} radius="full" class="text-small">{cta.primary.label}</Button>
+    </div>
+
+    <!-- Mobil tetikleyici -->
+    <button
+      type="button"
+      id="mobile-toggle"
+      class="-mr-1.5 flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-ink/5 min-[1080px]:hidden"
+      aria-expanded="false"
+      aria-controls="mobile-panel"
+      aria-label="Menüyü aç"
+    >
+      <span class="relative block h-4 w-5" aria-hidden="true">
+        <span class="absolute left-0 top-0 h-px w-full bg-ink transition-transform duration-200"></span>
+        <span
+          class="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-ink transition-opacity duration-200"
+        ></span>
+        <span class="absolute bottom-0 left-0 h-px w-full bg-ink transition-transform duration-200"
+        ></span>
+      </span>
+    </button>
+
+    <!-- Mobil panel — o da adaya yaslanıyor -->
+    <div
+      id="mobile-panel"
+      hidden
+      class="absolute right-0 top-full z-10 max-h-[calc(100dvh-6rem)] w-full max-w-[26rem] overflow-y-auto overscroll-contain rounded-2xl border border-hairline bg-surface p-5 shadow-frame min-[1080px]:hidden"
+    >
+      <div class="flex flex-col gap-2.5 border-b border-hairline pb-5">
+        <Button href={cta.primary.href} size="lg" radius="full">{cta.primary.label}</Button>
+        <Button href={cta.secondary.href} variant="secondary" size="lg" radius="full">
+          {cta.secondary.label}
+        </Button>
+      </div>
+
+      <nav aria-label="Mobil menü" class="divide-y divide-hairline">
+        {
+          mobilePanels.map((panel) => (
+            <details class="group py-1">
+              <summary class="flex cursor-pointer list-none items-center justify-between py-3.5 text-body font-medium marker:content-none">
+                {panel.label}
+                <svg
+                  class="h-4 w-4 shrink-0 text-ink-muted transition-transform duration-200 group-open:rotate-180"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M4 6.5 8 10.5 12 6.5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </summary>
+              <div class="space-y-5 pb-4">
+                {panel.columns.flat().map((group) => (
+                  <div>
+                    {group.label && (
+                      <p class="font-mono text-label uppercase text-ink-muted">{group.label}</p>
+                    )}
+                    <ul class="mt-2 space-y-0.5">
+                      {group.links.map((link) => (
+                        <li>
+                          <a
+                            href={url(link.href)}
+                            class="-mx-2 block rounded-md px-2 py-2 text-small text-ink-muted"
+                          >
+                            {link.label}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </details>
+          ))
+        }
+        <a href={url('/hizmetler/')} class="block py-3.5 text-body font-medium">Hizmetler</a>
+        <a href={url('/program-ozellikleri/fiyatlandirma/')} class="block py-3.5 text-body font-medium">
+          Fiyatlandırma
+        </a>
+        <a href={url('/iletisim/')} class="block py-3.5 text-body font-medium">İletişim</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<style>
+  /* ---------------------------------------------------------------------
+     Ada — iki durum arası morph.
+     Geçiş yalnızca bileşik özelliklerde (max-width hariç kaçınılmaz);
+     yükseklik hiç değişmediği için sayfa akışı etkilenmiyor.
+  --------------------------------------------------------------------- */
+  .island {
+    max-width: var(--container-page);
+    border-radius: 0;
+    background-color: transparent;
+    box-shadow: none;
+    transition:
+      max-width 420ms var(--ease-precise),
+      padding-inline 420ms var(--ease-precise),
+      border-radius 420ms var(--ease-precise),
+      background-color 320ms linear,
+      border-color 320ms linear,
+      box-shadow 320ms linear,
+      backdrop-filter 320ms linear;
+  }
+
+  #site-header[data-scrolled='true'] .island {
+    /* 70rem: içerik kapsülün içinde nefes alsın, kenarlara yapışmasın */
+    max-width: min(calc(100% - 1.5rem), 76rem);
+    border-radius: 9999px;
+    border-color: var(--color-hairline);
+    /* %84 opaklık: arkadaki içerik bulanık geçsin ama menü metni okunsun */
+    background-color: color-mix(in srgb, var(--color-surface) 84%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(1.6);
+    backdrop-filter: blur(18px) saturate(1.6);
+    box-shadow:
+      0 1px 2px rgb(11 11 12 / 0.04),
+      0 12px 32px -14px rgb(11 11 12 / 0.22);
+  }
+
+  /* Kapsül hâlindeyken uçlardaki öğeler yuvarlak kenara yaklaşmasın */
+  #site-header[data-scrolled='true'] .island {
+    padding-inline: 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    #site-header[data-scrolled='true'] .island {
+      padding-inline: 1.75rem;
+    }
+  }
+
+  /* Mobil panel açıkken ada köşeleri yumuşasın ama kapsül olmasın —
+     altından çıkan panelle hizalı dursun */
+  #site-header[data-scrolled='true']:has(#mobile-panel:not([hidden])) .island {
+    border-radius: 1.5rem;
+  }
+
+  /* Panel görünürlüğü: opacity + visibility ile geçiş, display değil */
+  .js-menu-panel {
+    transition:
+      opacity 180ms var(--ease-out-quiet),
+      visibility 180ms;
+  }
+  .js-menu-item[data-open='true'] .js-menu-panel {
+    visibility: visible;
+    opacity: 1;
+  }
+  .js-menu-item[data-open='true'] .js-menu-trigger svg {
+    transform: rotate(180deg);
+  }
+
+  /* Mobil tetikleyici çarpı hâline gelir */
+  #mobile-toggle[aria-expanded='true'] span > span:nth-child(1) {
+    transform: translateY(7.5px) rotate(45deg);
+  }
+  #mobile-toggle[aria-expanded='true'] span > span:nth-child(2) {
+    opacity: 0;
+  }
+  #mobile-toggle[aria-expanded='true'] span > span:nth-child(3) {
+    transform: translateY(-7.5px) rotate(-45deg);
+  }
+
+  /* ---------------------------------------------------------------------
+     Koyu ton — yalnızca sayfa üstündeyken.
+     Kaydırılınca ada açık kapsüle döner; o noktada arkadaki içerik de
+     açık zeminli olduğu için tek bir kapsül görünümü yeterli.
+  --------------------------------------------------------------------- */
+  #site-header[data-tone='dark'][data-scrolled='false'] {
+    background-color: var(--color-void);
+  }
+  /* ÖNEMLİ: açılan paneller de `.island` içinde yaşıyor ama kendi beyaz
+     zeminleri var. Hariç tutulmazsa panel metni de beyaza döner ve
+     okunmaz hâle gelir (ölçülen kontrast 1,02:1). Kural yalnızca adanın
+     kendi çubuğundaki öğelere uygulanıyor. */
+  #site-header[data-tone='dark'][data-scrolled='false']
+    .island
+    :is(a, button, span, p):not(.js-menu-panel *, #mobile-panel *) {
+    color: var(--color-ink-inverse);
+  }
+  /* Koyu zeminde birincil düğme elektrik yeşiline geçer: koyu accent
+     (#0C6E37) siyah üzerinde sönük kalıyor, logo yeşili ise parlıyor. */
+  #site-header[data-tone='dark'][data-scrolled='false'] .island .btn-primary {
+    background-color: var(--color-electric);
+    color: var(--color-ink);
+  }
+  #site-header[data-tone='dark'][data-scrolled='false'] .island .btn-primary:hover {
+    background-color: var(--color-electric-hover);
+  }
+  #site-header[data-tone='dark'][data-scrolled='false']
+    .island
+    :is(a, button):not(.js-menu-panel *, #mobile-panel *):hover {
+    background-color: rgb(250 249 245 / 0.08);
+  }
+  /* Koyu zeminde ayrı logo dosyası kullanılıyor.
+     CSS `invert()` denendi ve marka yeşilini pembeye çeviriyordu (#FF7FFF). */
+  .logo-dark {
+    display: none;
+  }
+  #site-header[data-tone='dark'][data-scrolled='false'] .logo-light {
+    display: none;
+  }
+  #site-header[data-tone='dark'][data-scrolled='false'] .logo-dark {
+    display: block;
+  }
+  #site-header[data-tone='dark'][data-scrolled='false'] #mobile-toggle span > span {
+    background-color: var(--color-ink-inverse);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .island,
+    .js-menu-panel {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  /** ---------------------------------------------------------------
+   *  Üst bölge yüksekliği
+   *
+   *  Hero'nun "ekranın kalanını doldur" hesabı için gereken değer:
+   *  header'ın alt kenarının sayfa üstünden uzaklığı. Duyuru şeridi
+   *  olan ve olmayan sayfalarda farklı olduğu için sabit yazmak yerine
+   *  ölçülüp --top-stack olarak yayınlanıyor.
+   *  --------------------------------------------------------------- */
+  const header = document.getElementById('site-header');
+
+  if (header) {
+    const publishTopStack = () => {
+      // Header sticky; sayfa kaydırılmışken ölçüm yanıltır.
+      const offset = header.getBoundingClientRect().bottom + window.scrollY;
+      document.documentElement.style.setProperty('--top-stack', `${Math.round(offset)}px`);
+    };
+    publishTopStack();
+    window.addEventListener('resize', publishTopStack, { passive: true });
+    if (document.fonts?.ready) document.fonts.ready.then(publishTopStack);
+  }
+
+  if (header) {
+    // Histerezis: tek eşikte açıp kapatmak, eşiğin tam üstünde titremeye
+    // sebep oluyor. Açılma ve kapanma eşikleri ayrı.
+    const ON = 24;
+    const OFF = 8;
+    let condensed = false;
+    let ticking = false;
+
+    const apply = () => {
+      ticking = false;
+      const y = window.scrollY;
+      if (!condensed && y > ON) {
+        condensed = true;
+        header.dataset.scrolled = 'true';
+      } else if (condensed && y < OFF) {
+        condensed = false;
+        header.dataset.scrolled = 'false';
+      }
+    };
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(apply);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    apply(); // sayfa kaydırılmış hâlde açıldıysa doğru durumla başla
+  }
+
+  /** ---------------------------------------------------------------
+   *  Masaüstü mega menüleri
+   *  --------------------------------------------------------------- */
+  const items = Array.from(document.querySelectorAll<HTMLLIElement>('.js-menu-item'));
+
+  const close = (item: HTMLLIElement) => {
+    item.dataset.open = 'false';
+    item.querySelector('.js-menu-trigger')?.setAttribute('aria-expanded', 'false');
+  };
+
+  const open = (item: HTMLLIElement) => {
+    items.forEach((other) => other !== item && close(other));
+    item.dataset.open = 'true';
+    item.querySelector('.js-menu-trigger')?.setAttribute('aria-expanded', 'true');
+  };
+
+  items.forEach((item) => {
+    const trigger = item.querySelector<HTMLButtonElement>('.js-menu-trigger');
+    if (!trigger) return;
+
+    trigger.addEventListener('click', () => {
+      item.dataset.open === 'true' ? close(item) : open(item);
+    });
+
+    // İnce işaretçide hover ile aç; dokunmatikte yalnızca tıklama geçerli
+    const pointerFine = window.matchMedia('(hover: hover) and (pointer: fine)');
+    item.addEventListener('mouseenter', () => pointerFine.matches && open(item));
+    item.addEventListener('mouseleave', () => pointerFine.matches && close(item));
+
+    // Odak panelin dışına çıktığında kapat — klavyeyle sekerken takılı kalmasın
+    item.addEventListener('focusout', (event) => {
+      const next = event.relatedTarget;
+      if (!(next instanceof Node) || !item.contains(next)) close(item);
+    });
+  });
+
+  /** ---------------------------------------------------------------
+   *  Mobil panel
+   *  --------------------------------------------------------------- */
+  const toggle = document.getElementById('mobile-toggle');
+  const panel = document.getElementById('mobile-panel');
+
+  function closeMobile() {
+    if (!toggle || !panel) return;
+    panel.hidden = true;
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Menüyü aç');
+    document.documentElement.style.removeProperty('overflow');
+  }
+
+  toggle?.addEventListener('click', () => {
+    if (!panel) return;
+    const willOpen = panel.hidden;
+    panel.hidden = !willOpen;
+    toggle.setAttribute('aria-expanded', String(willOpen));
+    toggle.setAttribute('aria-label', willOpen ? 'Menüyü kapat' : 'Menüyü aç');
+    document.documentElement.style.overflow = willOpen ? 'hidden' : '';
+  });
+
+  window.matchMedia('(min-width: 1080px)').addEventListener('change', (e) => {
+    if (e.matches) closeMobile();
+  });
+
+  /** Esc: önce mega menü, sonra mobil panel */
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    const openItem = items.find((item) => item.dataset.open === 'true');
+    if (openItem) {
+      close(openItem);
+      openItem.querySelector<HTMLButtonElement>('.js-menu-trigger')?.focus();
+    }
+    if (panel && !panel.hidden) closeMobile();
+  });
+
+  /** Dışarı tıklayınca kapat */
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    items.forEach((item) => !item.contains(target) && close(item));
+  });
+</script>

@@ -1,0 +1,59 @@
+---
+/**
+ * Ürün ekran görüntüsü çerçevesi.
+ *
+ * Görsel verilmediğinde açıkça işaretli bir yer tutucu basar — doğru en-boy
+ * oranında, beklenen dosya adıyla. Böylece düzen son hâlinde kurulur ve görsel
+ * geldiğinde tek bir veri alanı doldurularak değişir.
+ */
+interface Props {
+  screenshot?: { src: string; alt: string; width: number; height: number };
+  placeholder: { file: string; ratio: string; describes: string };
+  /** Hero'da görsel daha büyük ve gölgeli durur. */
+  emphasis?: boolean;
+  class?: string;
+}
+
+const { screenshot, placeholder, emphasis = false, class: className = '' } = Astro.props;
+---
+
+<figure
+  class:list={[
+    'overflow-hidden rounded-lg border border-hairline bg-surface',
+    emphasis ? 'shadow-frame' : 'shadow-raise',
+    className,
+  ]}
+  style={`aspect-ratio: ${placeholder.ratio};`}
+>
+  {
+    screenshot ? (
+      <img
+        src={screenshot.src}
+        alt={screenshot.alt}
+        width={screenshot.width}
+        height={screenshot.height}
+        loading={emphasis ? 'eager' : 'lazy'}
+        decoding="async"
+        class="h-full w-full object-cover object-left-top"
+      />
+    ) : (
+      <div
+        class="relative flex h-full w-full flex-col items-center justify-center gap-3 bg-wash p-6 text-center"
+        role="img"
+        aria-label={`Yer tutucu: ${placeholder.describes}`}
+      >
+        {/* Çok sessiz bir eğik tarama — alanın kasıtlı olarak boş olduğunu belli eder */}
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 opacity-[0.55]"
+          style="background-image: repeating-linear-gradient(135deg, transparent 0 11px, var(--color-hairline) 11px 12px);"
+        />
+        <p class="relative font-mono text-[11px] uppercase tracking-[0.14em] text-ink-muted">
+          Yer tutucu
+        </p>
+        <p class="relative max-w-[32ch] text-small text-ink-muted">{placeholder.describes}</p>
+        <p class="relative font-mono text-[11px] text-ink-muted">{placeholder.file}</p>
+      </div>
+    )
+  }
+</figure>

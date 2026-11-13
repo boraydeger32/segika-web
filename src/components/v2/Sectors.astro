@@ -1,0 +1,37 @@
+---
+import Container from '../Container.astro';
+import Eyebrow from '../Eyebrow.astro';
+import { sectors, sectorsIntro } from '../../data/trust';
+
+/**
+ * Sektör şeridi — sahte müşteri yorumunun yerine geçen gerçek sosyal kanıt.
+ *
+ * On iki sektör de /program-ozellikleri/sektorler/ sayfasından. Uydurma
+ * logo duvarı ya da yorum yerine, doğrulanabilir bir kapsam beyanı:
+ * ziyaretçi kendi sektörünü listede görürse "bu bana göre" der.
+ */
+---
+
+<section class="border-t border-rule bg-sunk-soft" aria-labelledby="sektor-baslik">
+  <Container class="framed py-(--spacing-section)">
+    <div class="rise max-w-[46rem]">
+      <Eyebrow>{sectorsIntro.eyebrow}</Eyebrow>
+      <h2 id="sektor-baslik" class="mt-4 text-h2">{sectorsIntro.title}</h2>
+      <p class="mt-4 max-w-[58ch] text-ink-muted">{sectorsIntro.body}</p>
+    </div>
+
+    <ul class="stagger mt-12 flex flex-wrap gap-2.5">
+      {
+        sectors.map((sector) => (
+          <li class="rounded-full border border-hairline bg-surface px-4 py-2 text-small">
+            {sector}
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="mt-8 font-mono text-chip uppercase text-ink-muted">
+      Sektörünüz listede yoksa da çalışır — şartları sağlayan her özel sektör işletmesi
+    </p>
+  </Container>
+</section>

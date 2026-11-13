@@ -1,0 +1,156 @@
+---
+import { url } from '../../../lib/url';
+import Base from '../../../layouts/Base.astro';
+import Container from '../../../components/Container.astro';
+import PageHero from '../../../components/PageHero.astro';
+import Eyebrow from '../../../components/Eyebrow.astro';
+import Button from '../../../components/Button.astro';
+import CallToAction from '../../../components/CallToAction.astro';
+import { cta, contact } from '../../../data/site';
+import { modulePages } from '../../../data/module-pages';
+
+/**
+ * Fiyatlandırma.
+ *
+ * Mevcut segika.com'da açık fiyat listesi yok; sayfa yalnızca "uygun planı
+ * seçmek için bizimle iletişime geçin" diyor. Fiyat rakamı ya da fiyatın neye
+ * göre belirlendiği bana verilmedi, bu yüzden hiçbirini uydurmuyorum.
+ *
+ * Bu sayfa şimdilik: gerçek çağrı metni + işaretli yer tutucu + doğrulanmış
+ * özellik listesi + modül listesi. Fiyat bilgisi gelince `priceList` doldurulur
+ * ve yer tutucunun yerine plan tablosu kurulur.
+ */
+
+/** Doğrulanmış özellikler — hepsi segika.com veya Segika broşüründen. */
+const included = [
+  { label: 'Sınırsız sistem desteği', source: 'segika.com/sgk-tesvik-programi' },
+  { label: 'Mevzuat değişikliklerinde güncel kalır', source: 'segika.com/sgk-tesvik-programi' },
+  { label: 'Luca, Logo, Mikro ve Eta entegrasyonu', source: 'segika.com/duyurular' },
+  { label: 'Web API ile diğer bordro programlarına bağlantı', source: 'segika.com/duyurular' },
+  { label: 'Çoklu işyeri ve çoklu sicil yönetimi', source: 'Segika broşürü' },
+  { label: 'SGK sistemleriyle doğrudan entegrasyon', source: 'segika.com/sgk-araclari-ve-raporlar' },
+];
+---
+
+<Base
+  title="Fiyatlandırma — Segika SGK Otomasyon Yazılımı"
+  description="Şirketinize nasıl fayda sağlayacağımızı öğrenmek ve uygun planı seçmek için bizimle iletişime geçin. Fiyat, sicil sayısına ve seçtiğiniz modüllere göre belirlenir."
+>
+  <PageHero
+    eyebrow="Fiyatlandırma"
+    headline="Size uygun planı birlikte belirleyelim."
+    intro="Şirketinize nasıl fayda sağlayacağımızı öğrenmek ve uygun planı seçmek için bizimle iletişime geçin."
+    crumbs={[
+      { label: 'Program Özellikleri', href: '/kategori/program-ozellikleri/' },
+      { label: 'Fiyatlandırma' },
+    ]}
+  >
+    <div class="mt-9 flex flex-wrap items-center gap-x-6 gap-y-4">
+      <Button href={url('/iletisim/')} size="lg">Teklif alın</Button>
+      <Button href={cta.primary.href} variant="quiet">Önce ücretsiz deneyin</Button>
+    </div>
+  </PageHero>
+
+  {/* Fiyat tablosu yer tutucusu — rakam veya plan bilgisi verilmedi */}
+  <section aria-labelledby="plan-baslik">
+    <Container class="py-(--spacing-section)">
+      <Eyebrow>Planlar</Eyebrow>
+      <h2 id="plan-baslik" class="mt-4 max-w-[24ch] text-h2">Plan ve fiyat bilgisi</h2>
+
+      <div
+        class="relative mt-10 overflow-hidden rounded-lg border border-hairline bg-wash p-10 text-center sm:p-16"
+        role="note"
+      >
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 opacity-[0.55]"
+          style="background-image: repeating-linear-gradient(135deg, transparent 0 11px, var(--color-hairline) 11px 12px);"
+        >
+        </div>
+        <p class="relative font-mono text-[11px] uppercase tracking-[0.14em] text-ink-muted">
+          Yer tutucu
+        </p>
+        <p class="relative mx-auto mt-3 max-w-[46ch] text-ink-muted">
+          Plan adları, kapsamları ve fiyatları elimde yok. Mevcut sitede de yayınlanmıyor.
+          Bu bölüm, fiyat listesi paylaşıldığında plan tablosuyla değiştirilecek.
+        </p>
+        <p class="relative mt-4 font-mono text-[11px] text-ink-muted">
+          src/pages/program-ozellikleri/fiyatlandirma/index.astro → priceList
+        </p>
+        <div class="relative mt-8">
+          <Button href={url('/iletisim/')}>Teklif alın</Button>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  {/* Her planda olanlar */}
+  <section class="border-t border-hairline bg-wash" aria-labelledby="dahil-baslik">
+    <Container class="py-(--spacing-section)">
+      <div class="grid gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
+        <div>
+          <Eyebrow>Sistemle birlikte gelenler</Eyebrow>
+          <h2 id="dahil-baslik" class="mt-4 text-h2">Her kullanımda var</h2>
+          <p class="mt-4 max-w-[38ch] text-small text-ink-muted">
+            Bu maddelerin hangi plana dahil olduğu bilgisi elimde yok; hepsi sistemin
+            doğrulanmış özellikleri.
+          </p>
+        </div>
+        <ul class="grid gap-x-10 border-t border-hairline sm:grid-cols-2">
+          {
+            included.map((item) => (
+              <li class="flex items-baseline gap-3 border-b border-hairline py-3.5 text-small">
+                <svg
+                  class="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="m2.5 7.5 3 3 6-7"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                {item.label}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </Container>
+  </section>
+
+  {/* Modül listesi — neyi seçebileceğini göstermek için */}
+  <section aria-labelledby="moduller-baslik">
+    <Container class="py-(--spacing-section)">
+      <Eyebrow>Modüller</Eyebrow>
+      <h2 id="moduller-baslik" class="mt-4 max-w-[26ch] text-h2">
+        Yalnızca kullandığınız modülü ödersiniz.
+      </h2>
+      <ul class="mt-10 divide-y divide-hairline border-y border-hairline">
+        {
+          modulePages.map((module) => (
+            <li>
+              <a
+                href={url(`/${module.slug}/`)}
+                class="group grid gap-2 py-5 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:items-baseline lg:gap-10"
+              >
+                <span class="text-h3 font-medium group-hover:text-accent">{module.name}</span>
+                <span class="text-small text-ink-muted">{module.intro}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  </section>
+
+  <CallToAction
+    title="Size uygun planı birlikte belirleyelim."
+    body={`Telefon: ${contact.phone.label} · ${contact.gsm.label}`}
+    tone="wash"
+  />
+</Base>

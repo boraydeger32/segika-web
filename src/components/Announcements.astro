@@ -1,0 +1,68 @@
+---
+import Container from './Container.astro';
+import PageHero from './PageHero.astro';
+import CallToAction from './CallToAction.astro';
+
+/**
+ * Duyurular içeriği.
+ *
+ * Mevcut siteden yalnızca bir duyurunun metni çıkarılabildi; başlık, tarih ve
+ * diğer duyurular elimde yok. Uydurma duyuru yazmak yerine doğrulanabilen tek
+ * kaydı basıyor, gerisi için işaretli yer tutucu bırakıyorum.
+ *
+ * İki adresten de sunuluyor (/duyurular/ ve /kategori/duyurular/), bu yüzden
+ * tek bileşen hâlinde — canonical'ı rotalar belirliyor.
+ */
+
+const announcements = [
+  {
+    title: 'Bordro programlarıyla tam entegrasyon',
+    body: 'SGK Otomasyon yazılımımız, Luca, Logo, Mikro ve Eta gibi yaygın bordro programlarıyla tam entegrasyon sunarken; web API altyapısı sayesinde tüm diğer programlarla da çalışabiliyor.',
+  },
+];
+---
+
+<PageHero
+  eyebrow="Duyurular"
+  headline="Üründen ve mevzuattan|haberler."
+  crumbs={[{ label: 'Duyurular' }]}
+/>
+
+<section>
+  <Container class="py-(--spacing-section)">
+    <ul class="divide-y divide-hairline border-y border-hairline">
+      {
+        announcements.map((item) => (
+          <li class="grid gap-x-12 gap-y-3 py-8 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+            <h2 class="text-h3 font-medium">{item.title}</h2>
+            <p class="max-w-[62ch] text-ink-muted">{item.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div
+      class="relative mt-12 overflow-hidden rounded-lg border border-hairline bg-wash p-8 text-center"
+      role="note"
+    >
+      <div
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-0 opacity-[0.55]"
+        style="background-image: repeating-linear-gradient(135deg, transparent 0 11px, var(--color-hairline) 11px 12px);"
+      >
+      </div>
+      <p class="relative font-mono text-[11px] uppercase tracking-[0.14em] text-ink-muted">
+        Yer tutucu
+      </p>
+      <p class="relative mx-auto mt-3 max-w-[48ch] text-ink-muted">
+        Geçmiş duyuruların başlıkları ve tarihleri elimde yok. Liste paylaşıldığında
+        bu sayfa tarihli akış hâline getirilecek.
+      </p>
+      <p class="relative mt-4 font-mono text-[11px] text-ink-muted">
+        src/components/Announcements.astro → announcements
+      </p>
+    </div>
+  </Container>
+</section>
+
+<CallToAction tone="wash" />

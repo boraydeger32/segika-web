@@ -1,0 +1,180 @@
+---
+import Base from '../../layouts/Base.astro';
+import Container from '../../components/Container.astro';
+import PageHero from '../../components/PageHero.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import Button from '../../components/Button.astro';
+import { cta, contact } from '../../data/site';
+
+/**
+ * İletişim.
+ *
+ * Form yok — brief'te form gönderimi kapsam dışı ve backend de yok.
+ * Bunun yerine doğrudan kanallar: telefon, GSM, WhatsApp, e-posta.
+ * Her biri tek dokunuşla açılan gerçek bağlantı.
+ */
+
+const channels = [
+  {
+    label: 'Telefon',
+    value: contact.phone.label,
+    href: contact.phone.href,
+    note: 'Sabit hat',
+  },
+  {
+    label: 'GSM',
+    value: contact.gsm.label,
+    href: contact.gsm.href,
+    note: 'Cep hattı',
+  },
+  {
+    label: 'WhatsApp',
+    value: '0555 142 71 71',
+    href: contact.whatsapp.href,
+    note: 'Yazılı destek ve hızlı sorular için',
+  },
+  {
+    label: 'E-posta',
+    value: contact.email.label,
+    href: contact.email.href,
+    note: 'Teklif ve kurumsal talepler için',
+  },
+];
+
+const topics = [
+  {
+    title: 'Ürünü denemek istiyorum',
+    body: 'Hesap açmak için bize yazmanıza gerek yok; kayıt sayfasından doğrudan başlayabilirsiniz.',
+    action: { label: 'Ücretsiz Deneyin', href: cta.primary.href },
+  },
+  {
+    title: 'Fiyat teklifi almak istiyorum',
+    body: 'Sicil ve çalışan sayınızla birlikte yazın; size uygun planı birlikte belirleyelim.',
+    action: { label: 'WhatsApp’tan yazın', href: contact.whatsapp.href },
+  },
+  {
+    title: 'Danışmanlık hizmeti almak istiyorum',
+    body: 'İş hukuku, İK yönetimi veya işe alım konularında hangi hizmetin uygun olduğunu konuşalım.',
+    action: { label: 'Danışmanlık hizmetleri', href: '/danismanlik-hizmetleri/' },
+  },
+  {
+    title: 'Mevcut hesabımla ilgili desteğe ihtiyacım var',
+    body: 'Sistem desteği sınırsızdır. Panele giriş yapıp destek talebi açabilir ya da doğrudan arayabilirsiniz.',
+    action: { label: 'Üye Girişi', href: cta.secondary.href },
+  },
+];
+---
+
+<Base
+  title="İletişim — Segika SGK Otomasyon Yazılımı"
+  description="Segika ile iletişime geçin. Telefon (0212) 909 99 41, GSM (0555) 142 71 71, WhatsApp ve e-posta ile doğrudan ulaşabilirsiniz."
+>
+  <PageHero
+    eyebrow="İletişim"
+    headline="Doğrudan ulaşın."
+    intro="Formla uğraşmayın. Aşağıdaki kanallardan hangisi size uygunsa oradan yazın ya da arayın."
+    crumbs={[{ label: 'İletişim' }]}
+  />
+
+  {/* Kanallar */}
+  <section aria-labelledby="kanallar-baslik">
+    <Container class="py-(--spacing-section)">
+      <Eyebrow>Kanallar</Eyebrow>
+      <h2 id="kanallar-baslik" class="sr-only">İletişim kanalları</h2>
+
+      <dl class="mt-8 grid gap-x-10 border-t border-hairline sm:grid-cols-2">
+        {
+          channels.map((channel) => (
+            <div class="border-b border-hairline py-6">
+              <dt class="font-mono text-label uppercase text-ink-muted">{channel.label}</dt>
+              <dd class="mt-2">
+                <a
+                  href={channel.href}
+                  rel={channel.href.startsWith('http') ? 'noopener' : undefined}
+                  class="text-h3 font-medium tabular-nums transition-colors hover:text-accent"
+                >
+                  {channel.value}
+                </a>
+                <p class="mt-1 text-small text-ink-muted">{channel.note}</p>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </Container>
+  </section>
+
+  {/* Konuya göre yönlendirme */}
+  <section class="border-t border-hairline bg-wash" aria-labelledby="konular-baslik">
+    <Container class="py-(--spacing-section)">
+      <Eyebrow>Ne için yazıyorsunuz?</Eyebrow>
+      <h2 id="konular-baslik" class="mt-4 max-w-[24ch] text-h2">Doğru yere gidin.</h2>
+
+      <ul class="mt-12 divide-y divide-hairline border-y border-hairline">
+        {
+          topics.map((topic) => (
+            <li class="grid items-baseline gap-x-12 gap-y-3 py-7 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)_auto]">
+              <h3 class="text-h3 font-medium">{topic.title}</h3>
+              <p class="max-w-[52ch] text-small text-ink-muted">{topic.body}</p>
+              <a
+                href={topic.action.href}
+                rel={topic.action.href.startsWith('http') ? 'noopener' : undefined}
+                class="whitespace-nowrap text-small font-medium text-accent underline decoration-from-font underline-offset-4"
+              >
+                {topic.action.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  </section>
+
+  {/* Adres — bilgi verilmedi, işaretli yer tutucu */}
+  <section class="border-t border-hairline" aria-labelledby="adres-baslik">
+    <Container class="py-(--spacing-section)">
+      <div class="grid gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
+        <div>
+          <Eyebrow>Ofis</Eyebrow>
+          <h2 id="adres-baslik" class="mt-4 text-h2">Adres</h2>
+        </div>
+        <div
+          class="relative overflow-hidden rounded-lg border border-hairline bg-wash p-8 text-center"
+          role="note"
+        >
+          <div
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-0 opacity-[0.55]"
+            style="background-image: repeating-linear-gradient(135deg, transparent 0 11px, var(--color-hairline) 11px 12px);"
+          >
+          </div>
+          <p class="relative font-mono text-[11px] uppercase tracking-[0.14em] text-ink-muted">
+            Yer tutucu
+          </p>
+          <p class="relative mx-auto mt-3 max-w-[44ch] text-small text-ink-muted">
+            Açık ofis adresi elimde yok — mevcut sitede de yayınlanmıyor. Adres
+            paylaşıldığında bu alana yazılacak.
+          </p>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <section class="border-t border-hairline">
+    <Container class="py-(--spacing-section)">
+      <div class="mx-auto max-w-[36rem] text-center">
+        <h2 class="text-h2">Önce kendiniz görün.</h2>
+        <p class="mt-4 text-ink-muted">
+          Hesap açmak için görüşmeye gerek yok. Kayıt olun, sicillerinizi tanımlayın,
+          sistemi kendi verinizle deneyin.
+        </p>
+        <div class="mt-9 flex flex-wrap justify-center gap-x-6 gap-y-4">
+          <Button href={cta.primary.href} size="lg">{cta.primary.label}</Button>
+          <Button href={cta.secondary.href} variant="secondary" size="lg">
+            {cta.secondary.label}
+          </Button>
+        </div>
+      </div>
+    </Container>
+  </section>
+</Base>

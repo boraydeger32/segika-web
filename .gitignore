@@ -1,0 +1,49 @@
+# Bağımlılıklar
+node_modules/
+.pnpm-store/
+
+# Derleme çıktıları
+dist/
+dist-preview/
+dist-v2/
+dist-v3/
+.astro/
+.vercel/
+.netlify/
+
+# ============================================================
+# KVKK — herkese açık depoya girmemesi gerekenler
+#
+# assets/_kvkk-riskli/ içinde mevcut segika.com'dan indirilmiş, GERÇEK
+# kişisel veri taşıyan ekran görüntüleri var: TC Kimlik numaraları,
+# ad-soyad, sağlık durumu (HASTALIK / İŞ KAZASI), ücret tutarları,
+# müşteri firma borçları ve e-posta adresleri.
+#
+# assets/KVKK-RISKLI-GORSELLER.md ise bu görsellerin canlı sitedeki tam
+# adreslerini listeliyor — açık bir depoda bu liste "nereye bakılacağını"
+# gösterir.
+#
+# İkisi de sitede kullanılmıyor; yalnızca neyin kaldırılması gerektiğini
+# belgelemek için yerelde duruyor. Depoya girerse sonradan silinse bile
+# git geçmişinde kalır.
+# ============================================================
+assets/_kvkk-riskli/
+assets/KVKK-RISKLI-GORSELLER.md
+
+# Ham varlıklar — büyük ve siteye dahil değil
+assets/segika-brosur.pdf
+
+# Denetim ekran görüntüleri
+tools/.shots/
+tools/.v/
+
+# İşletim sistemi ve editör
+.DS_Store
+*.log
+.vscode/
+.idea/
+
+# Ortam değişkenleri
+.env
+.env.*
+!.env.example

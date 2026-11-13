@@ -1,0 +1,21 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+/** Sayfa genişliğini ve yan boşluğu tek yerden yöneten sarmalayıcı. */
+interface Props extends HTMLAttributes<'div'> {
+  as?: 'div' | 'section' | 'header' | 'footer' | 'nav';
+  /** `text` dar okuma genişliği (38rem), `page` tam sayfa (72rem). */
+  width?: 'page' | 'text';
+}
+
+const { as: Tag = 'div', width = 'page', class: className = '', ...rest } = Astro.props;
+
+const widths = {
+  page: 'max-w-[var(--container-page)]',
+  text: 'max-w-[var(--container-text)]',
+};
+---
+
+<Tag class:list={['mx-auto w-full px-(--spacing-gutter)', widths[width], className]} {...rest}>
+  <slot />
+</Tag>

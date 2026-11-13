@@ -1,0 +1,81 @@
+---
+import { url } from '../../lib/url';
+import Container from '../Container.astro';
+import Eyebrow from '../Eyebrow.astro';
+import { cta } from '../../data/site';
+
+/**
+ * Fiyat bandı.
+ *
+ * Fiyat rakamı elimde yok ve mevcut sitede de yayınlanmıyor — uydurmuyorum.
+ * Bandın işi rakam vermek değil, belirsizliği kapatmak: fiyatın neye göre
+ * belirlendiğini ve bir sonraki adımın ne olduğunu söylüyor.
+ *
+ * Üç kalem de doğrulanmış: modül seçimi (modüller ayrı ayrı satılıyor),
+ * sicil sayısı (panel sicil bazlı çalışıyor), ücretsiz deneme (kayıt açık).
+ */
+
+const factors = [
+  {
+    label: 'Kullandığınız modüller',
+    body: 'Teşvik, vizite, kimlik bildirimi, işkur ve SGK araçları ayrı ayrı veya birlikte alınabilir.',
+  },
+  {
+    label: 'Takip edilen sicil sayısı',
+    body: 'Tek işyerinden yüzlerce sicilli gruplara kadar; ödediğiniz, yönettiğiniz kadar.',
+  },
+  {
+    label: 'Önce deneyin',
+    body: 'Karar vermeden önce ücretsiz hesapla sistemi kendi verinizle görün.',
+  },
+];
+---
+
+<section class="border-t border-rule" aria-labelledby="fiyat-baslik">
+  <Container class="framed py-(--spacing-section)">
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
+      <div class="rise">
+        <Eyebrow>Fiyatlandırma</Eyebrow>
+        <h2 id="fiyat-baslik" class="mt-4 text-h2">Ödediğiniz, kullandığınız kadar.</h2>
+        <p class="mt-4 max-w-[38ch] text-ink-muted">
+          Tek bir liste fiyatı yok. Sicil ve çalışan sayınızı iletin, size uygun planı
+          birlikte belirleyelim.
+        </p>
+        <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+          <a
+            href={url('/iletisim/')}
+            class="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-3 font-medium text-canvas transition-colors hover:bg-accent-hover"
+          >
+            Teklif alın
+            <svg class="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path
+                d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"></path>
+            </svg>
+          </a>
+          <a
+            href={cta.primary.href}
+            rel="noopener"
+            class="text-small font-medium text-accent underline decoration-from-font underline-offset-4"
+          >
+            Önce ücretsiz deneyin
+          </a>
+        </div>
+      </div>
+
+      <dl class="stagger divide-y divide-hairline border-y border-hairline">
+        {
+          factors.map((f) => (
+            <div class="grid gap-x-10 gap-y-1 py-5 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)]">
+              <dt class="font-medium">{f.label}</dt>
+              <dd class="text-small text-ink-muted">{f.body}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </Container>
+</section>

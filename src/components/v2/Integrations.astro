@@ -1,0 +1,43 @@
+---
+import Container from '../Container.astro';
+import { integrations } from '../../data/trust';
+
+/**
+ * Entegrasyon şeridi — hero'nun hemen altında.
+ *
+ * Bordro uzmanının en büyük itirazı "mevcut düzenimi bozar mı". Bu şerit
+ * onu daha ilk ekranda kapatıyor. Logo dosyası olmadığı için isimler
+ * kelime markası olarak diziliyor — uydurma logo çizmektense dürüst.
+ */
+---
+
+<section class="border-b border-rule" aria-labelledby="entegrasyon-baslik">
+  <Container class="framed">
+    <div
+      class="rise grid gap-x-12 gap-y-5 py-7 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-center"
+    >
+      <div>
+        <h2 id="entegrasyon-baslik" class="text-small font-medium">
+          {integrations.claim}
+        </h2>
+        <p class="mt-1 max-w-[46ch] text-small text-ink-muted">{integrations.body}</p>
+      </div>
+
+      <ul class="flex flex-wrap items-center gap-x-3 gap-y-2 lg:justify-end">
+        {
+          integrations.names.map((name) => (
+            <li class="rounded-md border border-hairline bg-surface px-3.5 py-1.5 text-small font-medium">
+              {name}
+            </li>
+          ))
+        }
+        <li class="flex items-center gap-2 pl-1">
+          <span class="h-px w-4 bg-hairline" aria-hidden="true"></span>
+          <span class="font-mono text-chip uppercase text-ink-muted">
+            {integrations.fallback}
+          </span>
+        </li>
+      </ul>
+    </div>
+  </Container>
+</section>

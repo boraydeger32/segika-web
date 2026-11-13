@@ -1,0 +1,30 @@
+---
+/**
+ * Eski gizlilik adresi.
+ * Mevcut sitede hem /gizlilik/ hem /kurallar/gizlilik-politikasi/ var.
+ * İkisi de yayında kalıyor ama canonical tek adrese veriliyor.
+ */
+import Base from '../../layouts/Base.astro';
+import ContentPage from '../../components/ContentPage.astro';
+import { legalPages } from '../../data/content-pages';
+
+const page = legalPages.find((p) => p.slug === 'gizlilik-politikasi')!;
+const siblings = legalPages
+  .filter((p) => p.slug !== page.slug)
+  .map((p) => ({ label: p.title, href: `/kurallar/${p.slug}/` }));
+---
+
+<Base
+  title={`${page.title} — Segika`}
+  description={page.description}
+  canonicalPath="/kurallar/gizlilik-politikasi/"
+>
+  <ContentPage
+    page={page}
+    eyebrow="Kurallar"
+    crumbs={[{ label: page.title }]}
+    siblings={siblings}
+    siblingsLabel="Diğer yasal metinler"
+    fallback={{ label: 'İletişime geçin', href: '/iletisim/' }}
+  />
+</Base>
