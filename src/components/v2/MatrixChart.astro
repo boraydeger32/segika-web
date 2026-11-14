@@ -1,0 +1,310 @@
+---
+/**
+ * Yetenek matrisi — ısı haritası.
+ *
+ * Neden tablonun yerine: onay işaretli tablo "şu iş şu modülde var mı"
+ * sorusunu iyi cevaplıyor ama "hangi modül daha geniş" sorusunu
+ * cevaplamıyor — okuyucunun altmış hücreyi tek tek sayması gerekiyor.
+ * Isı haritasında sütunun doluluğu bir bakışta okunuyor ve sütun başlığının
+ * altında kapsadığı iş sayısı yazıyor.
+ *
+ * Aynı veriyi iki kez göstermiyoruz: bu bileşen tablonun yerine geçiyor,
+ * yanına değil. Tablo yalnızca JS gelmediğinde ya da ekran okuyucu için
+ * duruyor — yani içerik hiçbir koşulda kaybolmuyor.
+ */
+
+import Eyebrow from '../Eyebrow.astro';
+
+type Props = {
+  eyebrow?: string;
+  title: string;
+  body?: string;
+  columns: readonly string[];
+  rows: readonly { job: string; has: readonly string[] }[];
+  /** Kod → tam ad; ipucunda ve açıklamada kullanılıyor. */
+  legend: readonly { code: string; name: string }[];
+  source?: string;
+  class?: string;
+};
+
+const { eyebrow, title, body, columns, rows, legend, source, class: className = '' } = Astro.props;
+
+/** Sütun başına kapsanan iş sayısı — eksen etiketinin ikinci satırı. */
+const columnTotals = columns.map((c) => rows.filter((r) => r.has.includes(c)).length);
+
+/* Satır başına 40px + eksen payı. */
+const chartHeight = rows.length * 40 + 64;
+
+const payload = {
+  columns,
+  totals: columnTotals,
+  rows: rows.map((r) => ({ job: r.job, has: r.has })),
+  names: Object.fromEntries(legend.map((l) => [l.code, l.name])),
+};
+---
+
+<figure class={`not-prose ${className}`} data-matrix-chart>
+  <figcaption>
+    {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+    <h3 class="mt-4 max-w-[30ch] text-h3 font-medium">{title}</h3>
+    {body && <p class="mt-3 max-w-[56ch] text-small text-ink-muted">{body}</p>}
+  </figcaption>
+
+  <div
+    class="mt-9 -mx-(--spacing-gutter) overflow-x-auto px-(--spacing-gutter) sm:mx-0 sm:px-0"
+    data-matrix-scroll
+  >
+    <div
+      class="min-w-[35rem]"
+      style={`height:${chartHeight}px`}
+      data-chart-canvas
+      data-tone="light"
+      data-matrix={JSON.stringify(payload)}
+      aria-hidden="true"
+      hidden
+    >
+    </div>
+  </div>
+
+  {/*
+    Dar ekranda altı sütunun yalnızca üçü görünüyor. İpucu olmadan, kapsayan
+    modülü ekran dışında kalan satır (ör. İŞKUR çizelgesi) boşmuş gibi
+    okunuyor ve matris yanlış bilgi veriyor. `sm` üstünde tamamı sığdığı
+    için ipucu gizleniyor.
+  */}
+  <p class="mt-3 flex items-center gap-2 font-mono text-chip uppercase text-ink-muted sm:hidden">
+    <svg class="h-3 w-3" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path
+        d="M7.5 2.5 11 6l-3.5 3.5M11 6H1"
+        stroke="currentColor"
+        stroke-width="1.3"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+    </svg>
+    Tüm modüller için yana kaydırın
+  </p>
+
+  {/*
+    Yedek tablo — JS'siz tek içerik bu.
+
+    `contain: paint` neden var: tablo `min-w-[42rem]` taşıyor ve sarmalayıcı
+    `overflow-x: auto` ile bunu kendi içinde kaydırıyor. Buna rağmen Chrome,
+    kaydırılabilir alanı ata öğelerin `scrollWidth` hesabına katıyordu —
+    360px'te sayfa 661px ölçülüyordu. Kullanıcı yana kaydıramıyordu (ölçüldü:
+    scrollX hep 0) ama ölçüm kirleniyordu. Paint containment taşmayı
+    yayılmadan kesiyor; tablonun kendi yatay kaydırması çalışmaya devam ediyor.
+    Denenen ve işe yaramayanlar: max-width:100%, flow-root, overflow-x:scroll.
+  */}
+  <div
+    class="mt-9 overflow-x-auto rounded-lg border border-hairline bg-surface [contain:paint]"
+    data-chart-table
+  >
+    <table class="w-full min-w-[42rem] border-collapse text-small">
+      <caption class="sr-only">
+        Segika modüllerinin devraldığı işler karşılaştırma tablosu
+      </caption>
+      <thead>
+        <tr class="border-b border-hairline">
+          <th
+            scope="col"
+            class="px-5 py-4 text-left font-mono text-chip font-normal uppercase text-ink-muted"
+          >
+            İş
+          </th>
+          {
+            columns.map((c, i) => (
+              <th
+                scope="col"
+                class="px-3 py-4 text-center font-mono text-chip font-normal uppercase text-ink"
+              >
+                {c}
+                <span class="mt-1 block font-normal text-ink-muted">{columnTotals[i]} iş</span>
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+      <tbody>
+        {
+          rows.map((row) => (
+            <tr class="border-b border-hairline/60 last:border-0 hover:bg-wash">
+              <th scope="row" class="px-5 py-3.5 text-left font-normal">
+                {row.job}
+              </th>
+              {columns.map((c) => {
+                const on = row.has.includes(c);
+                return (
+                  <td class="px-3 py-3.5 text-center">
+                    {on ? (
+                      <>
+                        <span
+                          class="mx-auto flex h-5 w-5 items-center justify-center rounded-full bg-electric"
+                          aria-hidden="true"
+                        >
+                          <svg class="h-3 w-3 text-ink" viewBox="0 0 12 12" fill="none">
+                            <path
+                              d="m2 6.2 2.6 2.6L10 3.4"
+                              stroke="currentColor"
+                              stroke-width="1.8"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            />
+                          </svg>
+                        </span>
+                        <span class="sr-only">var</span>
+                      </>
+                    ) : (
+                      <>
+                        <span class="mx-auto block h-px w-3 bg-hairline" aria-hidden="true" />
+                        <span class="sr-only">yok</span>
+                      </>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  {source && <p class="mt-4 font-mono text-chip text-ink-muted">Kaynak: {source}</p>}
+</figure>
+
+<style>
+  [data-matrix-chart][data-ready='true'] [data-chart-table] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>
+
+<script>
+  import { mountCharts } from '../../lib/chart-mount';
+
+  type Payload = {
+    columns: string[];
+    totals: number[];
+    rows: { job: string; has: string[] }[];
+    names: Record<string, string>;
+  };
+
+  mountCharts('[data-matrix-chart]', ({ chart, canvas, tokens, reduced }) => {
+    const m: Payload = JSON.parse(canvas.dataset.matrix ?? 'null');
+    if (!m?.rows?.length) return;
+
+    /* [sütun, satır, kapsanıyor mu] */
+    const cells: [number, number, number][] = [];
+    m.rows.forEach((row, y) => {
+      m.columns.forEach((c, x) => cells.push([x, y, row.has.includes(c) ? 1 : 0]));
+    });
+
+    const layout = (w: number) => ({
+      /* İş adları uzun; sol pay tuval genişliğine bağlı, sabit değil. */
+      left: Math.max(112, Math.min(260, w * 0.34)),
+      right: 16,
+    });
+
+    const apply = () => {
+      const { left, right } = layout(canvas.clientWidth);
+      chart.setOption({
+        animation: !reduced,
+        animationDuration: 620,
+        animationDelay: (i: number) => (i % m.columns.length) * 60,
+        animationEasing: 'cubicOut',
+        grid: { left, right, top: 46, bottom: 8, containLabel: false },
+        /*
+          Isı haritası cartesian ızgarada rengi visualMap'ten çözüyor; sadece
+          itemStyle vermek hücreleri görünmez bırakıyor (ölçüldü). İkili bir
+          ölçekte renk çubuğu bilgi taşımadığı için gizli piecewise.
+        */
+        visualMap: {
+          show: false,
+          type: 'piecewise',
+          pieces: [
+            { value: 0, color: tokens.accentSoft },
+            { value: 1, color: tokens.bar },
+          ],
+        },
+        tooltip: {
+          backgroundColor: tokens.surface,
+          borderColor: tokens.line,
+          borderWidth: 1,
+          padding: [10, 12],
+          textStyle: { color: tokens.ink, fontSize: 13, fontFamily: 'inherit' },
+          extraCssText: 'box-shadow:0 8px 24px rgb(0 0 0 / 0.1);border-radius:8px;max-width:18rem;',
+          formatter: (p: { data: [number, number, number] }) => {
+            const [x, y, on] = p.data;
+            const code = m.columns[x];
+            return `<strong>${m.rows[y].job}</strong>
+              <div style="margin-top:4px;color:${on ? tokens.bar : tokens.muted}">
+                ${m.names[code] ?? code} — ${on ? 'devralıyor' : 'kapsam dışı'}
+              </div>`;
+          },
+        },
+        xAxis: {
+          type: 'category',
+          position: 'top',
+          data: m.columns,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { show: false },
+          axisLabel: {
+            fontFamily: 'inherit',
+            /* ECharts dar ekranda çakışan etiketleri gizliyor; 390px'te bir
+               sütun başlıksız kalıyordu. Matriste başlıksız sütun okunmaz. */
+            interval: 0,
+            /* İkinci satır sütunun kapsadığı iş sayısı — tablonun
+               cevaplamadığı "hangisi daha geniş" sorusu burada kapanıyor. */
+            formatter: (c: string, i: number) => `{kod|${c}}\n{adet|${m.totals[i]} iş}`,
+            rich: {
+              kod: { color: tokens.ink, fontSize: 12, fontWeight: 600, lineHeight: 16 },
+              adet: { color: tokens.muted, fontSize: 11, lineHeight: 15 },
+            },
+          },
+        },
+        yAxis: {
+          type: 'category',
+          inverse: true,
+          data: m.rows.map((r) => r.job),
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { show: false },
+          axisLabel: {
+            color: tokens.muted,
+            fontSize: 12.5,
+            fontFamily: 'inherit',
+            width: left - 18,
+            overflow: 'truncate',
+          },
+        },
+        series: [
+          {
+            type: 'heatmap',
+            data: cells,
+            itemStyle: {
+              borderWidth: 4,
+              /* Boşluk zemin renginde kenarlıkla açılıyor — hücreler
+                 arasına gerçek bir boşluk koymak ızgarayı kafese çeviriyordu. */
+              borderColor: tokens.surface,
+              borderRadius: 5,
+            },
+            label: { show: false },
+            emphasis: { itemStyle: { borderColor: tokens.surface, opacity: 0.85 } },
+          },
+        ],
+      });
+
+    };
+
+    apply();
+    return apply;
+  });
+</script>

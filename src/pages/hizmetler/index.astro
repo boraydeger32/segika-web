@@ -5,6 +5,7 @@ import Container from '../../components/Container.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import Icon from '../../components/Icon.astro';
 import ValueProps from '../../components/v2/ValueProps.astro';
+import MatrixChart from '../../components/v2/MatrixChart.astro';
 import { software, matrix, guide } from '../../data/service-catalog';
 import { services } from '../../data/services';
 import { cta, contact } from '../../data/site';
@@ -153,72 +154,13 @@ import { valueProps } from '../../data/value-props';
         </p>
       </div>
 
-      <div class="rise mt-12 overflow-x-auto rounded-lg border border-hairline bg-surface">
-        <table class="w-full min-w-[42rem] border-collapse text-small">
-          <caption class="sr-only">
-            Segika modüllerinin devraldığı işler karşılaştırma tablosu
-          </caption>
-          <thead>
-            <tr class="border-b border-hairline">
-              <th scope="col" class="px-5 py-4 text-left font-mono text-chip font-normal uppercase text-ink-muted">
-                İş
-              </th>
-              {
-                matrix.columns.map((c) => (
-                  <th
-                    scope="col"
-                    class="px-3 py-4 text-center font-mono text-chip font-normal uppercase text-ink"
-                  >
-                    {c}
-                  </th>
-                ))
-              }
-            </tr>
-          </thead>
-          <tbody>
-            {
-              matrix.rows.map((row) => (
-                <tr class="border-b border-hairline/60 last:border-0 hover:bg-wash">
-                  <th scope="row" class="px-5 py-3.5 text-left font-normal">
-                    {row.job}
-                  </th>
-                  {matrix.columns.map((c) => {
-                    const on = (row.has as readonly string[]).includes(c);
-                    return (
-                      <td class="px-3 py-3.5 text-center">
-                        {on ? (
-                          <>
-                            <span
-                              class="mx-auto flex h-5 w-5 items-center justify-center rounded-full bg-electric"
-                              aria-hidden="true"
-                            >
-                              <svg class="h-3 w-3 text-ink" viewBox="0 0 12 12" fill="none">
-                                <path
-                                  d="m2 6.2 2.6 2.6L10 3.4"
-                                  stroke="currentColor"
-                                  stroke-width="1.8"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                />
-                              </svg>
-                            </span>
-                            <span class="sr-only">var</span>
-                          </>
-                        ) : (
-                          <>
-                            <span class="mx-auto block h-px w-3 bg-hairline" aria-hidden="true" />
-                            <span class="sr-only">yok</span>
-                          </>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
-      </div>
+      <MatrixChart
+        title="Hangi iş hangi modülde"
+        columns={matrix.columns}
+        rows={matrix.rows}
+        legend={software.map((s) => ({ code: s.code, name: s.name }))}
+        class="rise mt-12"
+      />
 
       <dl class="rise mt-6 flex flex-wrap gap-x-7 gap-y-2">
         {

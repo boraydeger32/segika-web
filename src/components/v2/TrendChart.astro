@@ -1,0 +1,244 @@
+---
+/**
+ * Birikim grafiği — alan dolgulu çizgi.
+ *
+ * Çubuk grafik "hangisi daha büyük" sorusunu cevaplıyor; bu grafik
+ * "zamanla nereye varıyor" sorusunu. On iki ayın her birini ayrı çubuk
+ * yapmak satırları okunmaz hâle getirirdi, çizgi birikimi tek hamlede
+ * gösteriyor.
+ *
+ * Rakamlar temsilî ve öyle işaretli. Varsayım (kadro sabit) açıklamada
+ * yazılı — grafik, söylemediği bir şeyi ima etmemeli.
+ *
+ * JS gelmezse sunucuda basılan tablo yerinde kalır.
+ */
+
+import Eyebrow from '../Eyebrow.astro';
+
+export type TrendDatum = { label: string; value: number; display: string };
+
+type Props = {
+  eyebrow?: string;
+  title: string;
+  body?: string;
+  data: TrendDatum[];
+  unit?: string;
+  /** Sağ üstte duran kapanış rakamı — grafiğin tezi. */
+  highlight?: { label: string; value: string };
+  source: string;
+  representative?: boolean;
+  tone?: 'light' | 'dark';
+  class?: string;
+};
+
+const {
+  eyebrow,
+  title,
+  body,
+  data,
+  unit = '',
+  highlight,
+  source,
+  representative = false,
+  tone = 'light',
+  class: className = '',
+} = Astro.props;
+
+const dark = tone === 'dark';
+/* Yedek tabloda on iki satır uzun; çeyreklik özet yeterli. */
+const tableRows = data.filter((_, i) => (i + 1) % 3 === 0);
+---
+
+<figure class={`not-prose ${className}`} data-trend-chart>
+  <figcaption>
+    {eyebrow && <Eyebrow tone={dark ? 'inverse' : 'default'}>{eyebrow}</Eyebrow>}
+    <div class="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+      <h3 class={`text-h3 font-medium ${dark ? 'text-ink-inverse' : ''}`}>{title}</h3>
+      {
+        representative && (
+          <span
+            class={`rounded-full border px-2.5 py-1 font-mono text-chip uppercase ${
+              dark ? 'border-hairline-inverse text-ink-subtle' : 'border-hairline text-ink-muted'
+            }`}
+          >
+            Temsilî
+          </span>
+        )
+      }
+    </div>
+    {
+      body && (
+        <p class={`mt-3 max-w-[52ch] text-small ${dark ? 'text-ink-subtle' : 'text-ink-muted'}`}>
+          {body}
+        </p>
+      )
+    }
+  </figcaption>
+
+  {
+    highlight && (
+      <p class={`mt-8 border-t pt-6 ${dark ? 'border-hairline-inverse' : 'border-hairline'}`}>
+        <span
+          class={`block font-mono text-chip uppercase ${dark ? 'text-ink-subtle' : 'text-ink-muted'}`}
+        >
+          {highlight.label}
+        </span>
+        <span
+          class={`mt-2 block text-figure font-medium tabular-nums ${dark ? 'text-brand' : 'text-accent'}`}
+        >
+          {highlight.value}
+          <span class="text-[0.5em]">{unit}</span>
+        </span>
+      </p>
+    )
+  }
+
+  <div
+    class="mt-7 h-[260px] sm:h-[300px]"
+    data-chart-canvas
+    data-tone={tone}
+    data-unit={unit}
+    data-series={JSON.stringify(data)}
+    aria-hidden="true"
+    hidden
+  >
+  </div>
+
+  <div class="mt-7" data-chart-table>
+    <table class="w-full border-collapse text-small">
+      <caption class="sr-only">{title} — {source}</caption>
+      <thead>
+        <tr
+          class={`border-b ${dark ? 'border-hairline-inverse text-ink-subtle' : 'border-hairline text-ink-muted'}`}
+        >
+          <th scope="col" class="py-2.5 pr-4 text-left font-mono text-chip font-normal uppercase">
+            Dönem sonu
+          </th>
+          <th scope="col" class="py-2.5 text-right font-mono text-chip font-normal uppercase">
+            Biriken
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          tableRows.map((d, i) => (
+            <tr class={`border-b ${dark ? 'border-hairline-inverse' : 'border-hairline'}`}>
+              <th
+                scope="row"
+                class={`py-3 pr-4 text-left font-normal ${dark ? 'text-ink-inverse' : ''}`}
+              >
+                {(i + 1) * 3}. ay sonunda
+              </th>
+              <td class={`py-3 text-right font-mono tabular-nums ${dark ? 'text-ink-inverse' : ''}`}>
+                {d.display}
+                {unit}
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <p class={`mt-4 font-mono text-chip ${dark ? 'text-ink-subtle' : 'text-ink-muted'}`}>
+    Kaynak: {source}
+  </p>
+</figure>
+
+<style>
+  [data-trend-chart][data-ready='true'] [data-chart-table] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>
+
+<script>
+  import { mountCharts } from '../../lib/chart-mount';
+
+  type Datum = { label: string; value: number; display: string };
+
+  mountCharts('[data-trend-chart]', ({ chart, canvas, tokens, reduced }) => {
+    const data: Datum[] = JSON.parse(canvas.dataset.series ?? '[]');
+    const unit = canvas.dataset.unit ?? '';
+    if (!data.length) return;
+
+    /* Milyon kısaltması: eksende 7.271.320 gibi bir sayı dört basamak yer
+       kaplıyor ve etiketler üst üste biniyordu. */
+    const kisa = (v: number) => {
+      if (v === 0) return '0';
+      if (v >= 1_000_000)
+        return `${(v / 1_000_000).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} M`;
+      return `${Math.round(v / 1000)} B`;
+    };
+
+    chart.setOption({
+      animation: !reduced,
+      animationDuration: 980,
+      animationEasing: 'cubicOut',
+      grid: { left: 52, right: 12, top: 16, bottom: 28, containLabel: false },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: tokens.surface,
+        borderColor: tokens.line,
+        borderWidth: 1,
+        padding: [10, 12],
+        textStyle: { color: tokens.ink, fontSize: 13, fontFamily: 'inherit' },
+        extraCssText: 'box-shadow:0 8px 24px rgb(0 0 0 / 0.1);border-radius:8px;',
+        axisPointer: { type: 'line', lineStyle: { color: tokens.line } },
+        formatter: (p: { dataIndex: number }[]) => {
+          const d = data[p[0].dataIndex];
+          return `<strong>${d.label} sonunda</strong>
+            <div style="font-variant-numeric:tabular-nums;margin-top:2px">${d.display}${unit}</div>`;
+        },
+      },
+      xAxis: {
+        type: 'category',
+        data: data.map((d) => d.label),
+        boundaryGap: false,
+        axisLine: { lineStyle: { color: tokens.line } },
+        axisTick: { show: false },
+        axisLabel: { color: tokens.muted, fontSize: 12, fontFamily: 'inherit' },
+      },
+      yAxis: {
+        type: 'value',
+        /* Yatay ızgara tek başına kalıyor: dikey çizgiler eklenince grafik
+           kafes gibi oluyor ve sayfanın sakin diline aykırı düşüyor. */
+        splitLine: { lineStyle: { color: tokens.line, type: 'dashed' } },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: {
+          color: tokens.muted,
+          fontSize: 12,
+          fontFamily: 'inherit',
+          formatter: kisa,
+        },
+      },
+      series: [
+        {
+          type: 'line',
+          data: data.map((d) => d.value),
+          smooth: 0.25,
+          symbol: 'circle',
+          symbolSize: 6,
+          showSymbol: false,
+          lineStyle: { color: tokens.bar, width: 2 },
+          itemStyle: { color: tokens.bar, borderColor: tokens.surface, borderWidth: 2 },
+          emphasis: { focus: 'series', showSymbol: true },
+          areaStyle: {
+            /* Dolgu üstte belirgin, altta kayboluyor — çizginin altındaki
+               alan okunsun ama zemini boğmasın. */
+            opacity: 0.16,
+            color: tokens.bar,
+          },
+        },
+      ],
+    });
+  });
+</script>

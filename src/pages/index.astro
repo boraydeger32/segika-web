@@ -14,10 +14,12 @@ import PricingBand from '../components/v2/PricingBand.astro';
 import Faq from '../components/v2/Faq.astro';
 import Icon from '../components/Icon.astro';
 import ValueProps from '../components/v2/ValueProps.astro';
+import ShareChart from '../components/v2/ShareChart.astro';
 import { cta } from '../data/site';
 import { modules } from '../data/modules';
 import { services, featuredGuides } from '../data/services';
 import { valueProps, valuePropsIntro } from '../data/value-props';
+import { sicilShare, sicilShareChart } from '../data/charts';
 
 /**
  * Home — yarışma teslimi, 1/3.
@@ -226,13 +228,31 @@ const bento = modules.map((m, i) => ({
     {/* 7 · İşlem defteri — hâlâ sayfanın omurgası */}
     <Ledger />
 
-    {/* 8 · Sektörler — gerçek sosyal kanıt */}
+    {/* 8 · Kapsama — defterde "61.000 sicil" dendi, burada o sicillerde
+           ne çalıştığı görünüyor. Koyu defterden sonra açık nefes. */}
+    <section class="border-t border-rule" aria-labelledby="kapsama-baslik">
+      <Container class="framed py-(--spacing-section)">
+        <h2 id="kapsama-baslik" class="sr-only">Sicil kapsama oranları</h2>
+        <ShareChart
+          eyebrow={sicilShareChart.eyebrow}
+          title={sicilShareChart.title}
+          body={sicilShareChart.body}
+          data={sicilShare}
+          total={sicilShareChart.total}
+          totalDisplay={sicilShareChart.totalDisplay}
+          source={sicilShareChart.source}
+          class="rise max-w-[58rem]"
+        />
+      </Container>
+    </section>
+
+    {/* 9 · Sektörler — gerçek sosyal kanıt */}
     <Sectors />
 
-    {/* 9 · Fiyat bandı */}
+    {/* 10 · Fiyat bandı */}
     <PricingBand />
 
-    {/* 10 · Danışmanlık — başlık yanda sabit kalır, kartlar yanından akar */}
+    {/* 11 · Danışmanlık — başlık yanda sabit kalır, kartlar yanından akar */}
     <section class="border-t border-rule" aria-labelledby="v2-danismanlik">
       <Container class="framed py-(--spacing-section)">
         <div class="grid gap-10 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16">
@@ -284,7 +304,7 @@ const bento = modules.map((m, i) => ({
       </Container>
     </section>
 
-    {/* 11 · Rehber */}
+    {/* 12 · Rehber */}
     <section class="border-t border-rule" aria-labelledby="v2-rehber">
       <Container class="framed py-(--spacing-section)">
         <div class="rise flex flex-wrap items-end justify-between gap-6">
@@ -334,10 +354,10 @@ const bento = modules.map((m, i) => ({
       </Container>
     </section>
 
-    {/* 12 · Sıkça sorulanlar — son itirazlar burada kapanıyor */}
+    {/* 13 · Sıkça sorulanlar — son itirazlar burada kapanıyor */}
     <Faq />
 
-    {/* 13 · Kapanış — koyu, defter dokusuyla */}
+    {/* 14 · Kapanış — koyu, defter dokusuyla */}
     <section class="ruled-void border-t border-rule text-ink-inverse">
       <Container class="py-(--spacing-section)">
         <div class="stagger mx-auto max-w-[34rem] text-center">

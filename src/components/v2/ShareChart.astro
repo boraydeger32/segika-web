@@ -1,0 +1,224 @@
+---
+/**
+ * Kapsama grafiği — "toplamın kaçında" sorusunu gösteren yığılı çubuk.
+ *
+ * Yatay sütun grafiğinden farkı: orada çubuklar birbiriyle karşılaştırılıyor,
+ * burada her çubuk kendi paydasına göre okunuyor. Bu yüzden her satırın
+ * arkasında toplamı temsil eden soluk bir ray var — burada ray anlamlı,
+ * çünkü payda gerçekten sabit (61.000 sicil).
+ *
+ * JS gelmezse sunucuda basılan tablo yerinde kalır.
+ */
+
+import Eyebrow from '../Eyebrow.astro';
+
+export type ShareDatum = {
+  label: string;
+  value: number;
+  display: string;
+  /** Yüzde — veri katmanında hesaplanıyor, burada değil. */
+  share: number;
+  note: string;
+};
+
+type Props = {
+  eyebrow?: string;
+  title: string;
+  body?: string;
+  data: ShareDatum[];
+  /** Payda — tüm satırlar için ortak. */
+  total: number;
+  totalDisplay: string;
+  source: string;
+  tone?: 'light' | 'dark';
+  class?: string;
+};
+
+const {
+  eyebrow,
+  title,
+  body,
+  data,
+  total,
+  totalDisplay,
+  source,
+  tone = 'light',
+  class: className = '',
+} = Astro.props;
+
+const dark = tone === 'dark';
+const chartHeight = Math.max(170, data.length * 58 + 24);
+---
+
+<figure class={`not-prose ${className}`} data-share-chart>
+  <figcaption>
+    {eyebrow && <Eyebrow tone={dark ? 'inverse' : 'default'}>{eyebrow}</Eyebrow>}
+    <h3 class={`mt-4 max-w-[26ch] text-h3 font-medium ${dark ? 'text-ink-inverse' : ''}`}>
+      {title}
+    </h3>
+    {
+      body && (
+        <p class={`mt-3 max-w-[52ch] text-small ${dark ? 'text-ink-subtle' : 'text-ink-muted'}`}>
+          {body}
+        </p>
+      )
+    }
+  </figcaption>
+
+  <div
+    class="mt-7"
+    style={`height:${chartHeight}px`}
+    data-chart-canvas
+    data-tone={tone}
+    data-total={total}
+    data-series={JSON.stringify(data)}
+    aria-hidden="true"
+    hidden
+  >
+  </div>
+
+  <div class="mt-7" data-chart-table>
+    <table class="w-full border-collapse text-small">
+      <caption class="sr-only">{title} — toplam {totalDisplay} sicil üzerinden. {source}</caption>
+      <thead>
+        <tr
+          class={`border-b ${dark ? 'border-hairline-inverse text-ink-subtle' : 'border-hairline text-ink-muted'}`}
+        >
+          <th scope="col" class="py-2.5 pr-4 text-left font-mono text-chip font-normal uppercase">
+            Otomasyon
+          </th>
+          <th scope="col" class="py-2.5 text-right font-mono text-chip font-normal uppercase">
+            Sicil · pay
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          data.map((d) => (
+            <tr class={`border-b ${dark ? 'border-hairline-inverse' : 'border-hairline'}`}>
+              <th
+                scope="row"
+                class={`py-3 pr-4 text-left font-normal ${dark ? 'text-ink-inverse' : ''}`}
+              >
+                {d.label}
+                <span class={`block text-chip ${dark ? 'text-ink-subtle' : 'text-ink-muted'}`}>
+                  {d.note}
+                </span>
+              </th>
+              <td class={`py-3 text-right font-mono tabular-nums ${dark ? 'text-ink-inverse' : ''}`}>
+                {d.display}
+                <span class={dark ? 'text-brand' : 'text-accent'}>
+                  {' · %'}
+                  {d.share.toLocaleString('tr-TR', { maximumFractionDigits: 1 })}
+                </span>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <p class={`mt-4 font-mono text-chip ${dark ? 'text-ink-subtle' : 'text-ink-muted'}`}>
+    Kaynak: {source}
+  </p>
+</figure>
+
+<style>
+  [data-share-chart][data-ready='true'] [data-chart-table] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>
+
+<script>
+  import { mountCharts, tr } from '../../lib/chart-mount';
+
+  type Datum = { label: string; value: number; display: string; share: number; note: string };
+
+  /** Yüzdeyi Türkçe ondalık ayracıyla yazar: 34.4 → "34,4". */
+  const yuzde = (n: number) => n.toLocaleString('tr-TR', { maximumFractionDigits: 1 });
+
+  mountCharts('[data-share-chart]', ({ chart, canvas, tokens, reduced }) => {
+    const data: Datum[] = JSON.parse(canvas.dataset.series ?? '[]');
+    const total = Number(canvas.dataset.total ?? 0);
+    if (!data.length || !total) return;
+
+    /* Etiketler çubuğun üstünde duruyor, solunda değil: payda ve yüzde aynı
+       satıra sığmıyordu ve 360px'te etiket sütunu çubuğu eziyordu. */
+    chart.setOption({
+      animation: !reduced,
+      animationDuration: 820,
+      animationDelay: (i: number) => i * 90,
+      animationEasing: 'cubicOut',
+      grid: { left: 0, right: 0, top: 22, bottom: 0, containLabel: false },
+      tooltip: {
+        trigger: 'item',
+        backgroundColor: tokens.surface,
+        borderColor: tokens.line,
+        borderWidth: 1,
+        padding: [10, 12],
+        textStyle: { color: tokens.ink, fontSize: 13, fontFamily: 'inherit' },
+        extraCssText: 'box-shadow:0 8px 24px rgb(0 0 0 / 0.1);border-radius:8px;',
+        formatter: (p: { dataIndex: number }) => {
+          const d = data[p.dataIndex];
+          return `<strong>${d.label}</strong>
+            <div style="font-variant-numeric:tabular-nums;margin-top:2px">%${yuzde(d.share)} — ${d.note}</div>`;
+        },
+      },
+      xAxis: { type: 'value', show: false, max: total },
+      yAxis: {
+        type: 'category',
+        inverse: true,
+        data: data.map((d) => d.label),
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: { show: false },
+      },
+      series: [
+        {
+          /* Alt katman: payda. Sabit ve anlamlı olduğu için ray burada doğru. */
+          type: 'bar',
+          silent: true,
+          barGap: '-100%',
+          barWidth: 10,
+          data: data.map(() => total),
+          itemStyle: { color: tokens.accentSoft, borderRadius: 5 },
+          z: 1,
+        },
+        {
+          type: 'bar',
+          barWidth: 10,
+          data: data.map((d) => d.value),
+          itemStyle: { color: tokens.bar, borderRadius: 5 },
+          z: 2,
+          label: {
+            show: true,
+            position: 'insideTopLeft',
+            offset: [0, -24],
+            color: tokens.ink,
+            fontSize: 13,
+            fontWeight: 500,
+            fontFamily: 'inherit',
+            formatter: (p: { dataIndex: number }) => {
+              const d = data[p.dataIndex];
+              return `{ad|${d.label}}  {pay|%${yuzde(d.share)}}  {adet|${tr(d.value)} sicil}`;
+            },
+            rich: {
+              ad: { color: tokens.ink, fontSize: 13, fontWeight: 500 },
+              pay: { color: tokens.bar, fontSize: 13, fontWeight: 600 },
+              adet: { color: tokens.muted, fontSize: 12 },
+            },
+          },
+        },
+      ],
+    });
+  });
+</script>

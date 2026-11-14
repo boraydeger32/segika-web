@@ -6,10 +6,18 @@ import Eyebrow from '../../components/Eyebrow.astro';
 import HeroBackdrop from '../../components/v2/HeroBackdrop.astro';
 import BarChart from '../../components/v2/BarChart.astro';
 import ValueProps from '../../components/v2/ValueProps.astro';
+import TrendChart from '../../components/v2/TrendChart.astro';
 import { cta, contact } from '../../data/site';
 import { incentivePages } from '../../data/content-pages';
 import { integrations } from '../../data/trust';
-import { incentiveMix, incentiveChart } from '../../data/charts';
+import {
+  incentiveMix,
+  incentiveChart,
+  incentivePerPerson,
+  perPersonChart,
+  cumulativeYear,
+  cumulativeChart,
+} from '../../data/charts';
 import { landingValueProps } from '../../data/value-props';
 
 /**
@@ -237,6 +245,24 @@ const sample = {
           <p class="mt-4 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-muted">
             Temsilî veri · gerçek kanun kodlarıyla kurgulanmıştır
           </p>
+
+          {/* Tablodaki aylık toplamın yıla yayılmış hâli — "yukarıdaki aylık
+              toplam" ifadesi ancak tablonun hemen altında doğru okunuyor. */}
+          <div class="mt-14 border-t border-hairline pt-12">
+            <TrendChart
+              eyebrow={cumulativeChart.eyebrow}
+              title={cumulativeChart.title}
+              body={cumulativeChart.body}
+              data={cumulativeYear}
+              unit={cumulativeChart.unit}
+              highlight={{
+                label: 'On iki ay sonunda biriken',
+                value: cumulativeChart.totalDisplay,
+              }}
+              source={cumulativeChart.source}
+              representative
+            />
+          </div>
         </div>
       </div>
     </Container>
@@ -294,6 +320,20 @@ const sample = {
           unit={incentiveChart.unit}
           columns={incentiveChart.columns}
           source={incentiveChart.source}
+          representative
+          class="max-w-[54rem]"
+        />
+      </div>
+
+      <div class="rise mt-16 border-t border-hairline pt-14 lg:mt-20 lg:pt-16">
+        <BarChart
+          eyebrow={perPersonChart.eyebrow}
+          title={perPersonChart.title}
+          body={perPersonChart.body}
+          data={incentivePerPerson}
+          unit={perPersonChart.unit}
+          columns={perPersonChart.columns}
+          source={perPersonChart.source}
           representative
           class="max-w-[54rem]"
         />
