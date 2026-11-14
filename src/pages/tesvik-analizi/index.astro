@@ -4,9 +4,13 @@ import Master from '../../layouts/Master.astro';
 import Container from '../../components/Container.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import HeroBackdrop from '../../components/v2/HeroBackdrop.astro';
+import BarChart from '../../components/v2/BarChart.astro';
+import ValueProps from '../../components/v2/ValueProps.astro';
 import { cta, contact } from '../../data/site';
 import { incentivePages } from '../../data/content-pages';
 import { integrations } from '../../data/trust';
+import { incentiveMix, incentiveChart } from '../../data/charts';
+import { landingValueProps } from '../../data/value-props';
 
 /**
  * Landing — yarışma teslimi, 3/3.
@@ -280,10 +284,32 @@ const sample = {
           </a>
         </li>
       </ul>
+
+      <div class="rise mt-16 border-t border-hairline pt-14 lg:mt-20 lg:pt-16">
+        <BarChart
+          eyebrow={incentiveChart.eyebrow}
+          title={incentiveChart.title}
+          body={incentiveChart.body}
+          data={incentiveMix}
+          unit={incentiveChart.unit}
+          columns={incentiveChart.columns}
+          source={incentiveChart.source}
+          representative
+          class="max-w-[54rem]"
+        />
+      </div>
     </Container>
   </section>
 
-  {/* 5 · İtiraz kırma — landing'in kritik bölümü */}
+  {/* 5 · Değer önerileri — teşvik kaybıyla doğrudan ilgili üç başlık */}
+  <ValueProps
+    eyebrow="Ne kazanırsınız"
+    title="Ücretsiz hesapla elinize geçen"
+    items={landingValueProps}
+    class="border-rule"
+  />
+
+  {/* 6 · İtiraz kırma — landing'in kritik bölümü */}
   <section class="border-b border-rule bg-sunk-soft" aria-labelledby="itiraz-baslik">
     <Container class="framed py-(--spacing-section)">
       <h2 id="itiraz-baslik" class="rise max-w-[30ch] text-h2">
@@ -322,7 +348,7 @@ const sample = {
     </Container>
   </section>
 
-  {/* 6 · Kapanış — tek çağrı, koyu */}
+  {/* 7 · Kapanış — tek çağrı, koyu */}
   <section class="ruled-void text-ink-inverse">
     <Container class="py-(--spacing-section)">
       <div class="stagger mx-auto max-w-[36rem] text-center">

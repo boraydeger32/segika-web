@@ -8,7 +8,11 @@
  * geldiğinde yalnızca bu alan doldurulacak.
  */
 
+import type { IconName } from '../lib/icons';
+
 export type ModuleEntry = {
+  /** Çizgi ikon — bkz. src/lib/icons.ts */
+  icon: IconName;
   /** Mono etiket — bölümün üstünde küçük, versal. */
   eyebrow: string;
   title: string;
@@ -37,6 +41,7 @@ export type ModuleEntry = {
 
 export const modules: ModuleEntry[] = [
   {
+    icon: 'tesvik',
     eyebrow: 'Teşvik',
     title: 'SGK Teşvik Programı',
     summary:
@@ -50,6 +55,7 @@ export const modules: ModuleEntry[] = [
     },
   },
   {
+    icon: 'vizite',
     eyebrow: 'Vizite',
     title: 'SGK Vizite Programı',
     summary:
@@ -63,6 +69,7 @@ export const modules: ModuleEntry[] = [
     },
   },
   {
+    icon: 'kaza',
     eyebrow: 'İş kazası',
     title: 'SGK İş Kazası Takibi',
     summary:
@@ -76,6 +83,7 @@ export const modules: ModuleEntry[] = [
     },
   },
   {
+    icon: 'kimlik',
     eyebrow: 'Kimlik bildirimi',
     title: 'Kimlik Bildirimi Programı',
     summary:
@@ -89,6 +97,7 @@ export const modules: ModuleEntry[] = [
     },
   },
   {
+    icon: 'iskur',
     eyebrow: 'İşkur',
     title: 'İşkur Bildirimi Programı',
     summary:
@@ -102,6 +111,7 @@ export const modules: ModuleEntry[] = [
     },
   },
   {
+    icon: 'araclar',
     eyebrow: 'Araçlar',
     title: 'SGK Araçları ve Raporlar',
     summary:

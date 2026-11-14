@@ -3,8 +3,12 @@
  * Başlıklar ve alt kalemler segika.com'dan birebir alındı.
  */
 
+import type { IconName } from '../lib/icons';
+
 export type Service = {
   index: string;
+  /** Çizgi ikon — bkz. src/lib/icons.ts */
+  icon: IconName;
   title: string;
   /** Kısa özet — alt kalemlerden türetilmedi, hizmetin kapsamını anlatır. */
   summary: string;
@@ -16,6 +20,7 @@ export type Service = {
 export const services: Service[] = [
   {
     index: '01',
+    icon: 'terazi',
     title: 'İş ve Sosyal Güvenlik Hukuku',
     summary:
       'İş sözleşmelerinden denetim süreçlerine, fesih ve ihtar uygulamalarından SGK uyuşmazlıklarına kadar riskleri önceden tespit eder, süreci birlikte yönetiriz.',
@@ -31,6 +36,7 @@ export const services: Service[] = [
   },
   {
     index: '02',
+    icon: 'ekip',
     title: 'İnsan Kaynakları Yönetimi',
     summary:
       'Organizasyon yapısından ücret sistemine, performans değerlendirmeden İK süreçlerinin dijitalleştirilmesine kadar kurumsal İK altyapısını kurarız.',
@@ -46,6 +52,7 @@ export const services: Service[] = [
   },
   {
     index: '03',
+    icon: 'ise-alim',
     title: 'Personel Bulma ve İşe Alım',
     summary:
       'Şirketinizin kültürüne ve sektörel dinamiklerine uygun nitelikli insan kaynağını, mavi yakadan üst düzey yönetime kadar bulur ve yerleştiririz.',

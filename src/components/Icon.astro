@@ -1,0 +1,39 @@
+---
+/**
+ * Çizgi ikon — yol verisi `src/lib/icons.ts` içinde.
+ *
+ * Erişilebilirlik: ikonlar her zaman bir metnin yanında duruyor, bu yüzden
+ * varsayılan `aria-hidden`. Tek başına anlam taşıyorsa `label` verin.
+ */
+import { iconPaths, type IconName } from '../lib/icons';
+
+type Props = {
+  name: IconName;
+  /** Kenar uzunluğu — Tailwind sınıfı yerine sayı, çünkü viewBox buna bağlı. */
+  size?: number;
+  /** Dolu verilirse ikon tek başına anlam taşır: role="img" + erişilebilir ad. */
+  label?: string;
+  class?: string;
+};
+
+const { name, size = 20, label, class: className = '' } = Astro.props;
+
+const a11y = label
+  ? { role: 'img', 'aria-label': label }
+  : { 'aria-hidden': 'true', focusable: 'false' };
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class={`shrink-0 ${className}`}
+  {...a11y}
+>
+  {iconPaths[name].map((d) => <path d={d} />)}
+</svg>

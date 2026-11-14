@@ -1,7 +1,9 @@
 ---
 import Container from './Container.astro';
 import Eyebrow from './Eyebrow.astro';
+import BarChart from './v2/BarChart.astro';
 import { ledgerIntro, ledgerGroups, ledgerTotal } from '../data/ledger';
+import { automationVolume, automationChart } from '../data/charts';
 
 /**
  * İşlem defteri — sayfadaki tek koyu bölüm ve tek cesur hamle.
@@ -13,6 +15,11 @@ import { ledgerIntro, ledgerGroups, ledgerTotal } from '../data/ledger';
  *
  * Hareket: bölüm görünür olduğunda rakamlar bir kez sayarak yükselir.
  * prefers-reduced-motion açıkken doğrudan son değer basılır.
+ *
+ * İkinci grup ("Otomatik işlemler") sayı listesi değil grafik: altı değer
+ * 4.000–21.000 aralığında, yani karşılaştırılabilir. Liste hâlinde okuyucu
+ * hangisinin ağır yük olduğunu göremiyordu; çubukta tek bakışta görüyor.
+ * Kapsam rakamları ve toplam grafiğe girmiyor — onlar ölçek, karşılaştırma değil.
  */
 ---
 
@@ -33,9 +40,11 @@ import { ledgerIntro, ledgerGroups, ledgerTotal } from '../data/ledger';
       {
         ledgerGroups.map((group, gi) => (
           <section class="mt-12 first:mt-0" aria-label={group.caption}>
-            <p class="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-subtle">
-              {group.caption}
-            </p>
+            {gi === 0 && (
+              <p class="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-subtle">
+                {group.caption}
+              </p>
+            )}
             {gi === 0 ? (
               <dl class="mt-4 border-t border-hairline-inverse">
                 {group.rows.map((row) => (
@@ -56,24 +65,16 @@ import { ledgerIntro, ledgerGroups, ledgerTotal } from '../data/ledger';
                 ))}
               </dl>
             ) : (
-              <dl class="mt-4 grid gap-x-12 border-t border-hairline-inverse sm:grid-cols-2">
-                {group.rows.map((row) => (
-                  <div class="flex items-baseline justify-between gap-5 border-b border-hairline-inverse py-4">
-                    <dt class="min-w-0">
-                      <span class="block font-mono text-label uppercase text-ink-inverse">
-                        {row.label}
-                      </span>
-                      <span class="mt-0.5 block text-small text-ink-subtle">{row.note}</span>
-                    </dt>
-                    <dd class="text-h2 font-medium text-brand">
-                      <span class="js-count tabular-nums" data-to={row.value} data-display={row.display}>
-                        {row.display}
-                      </span>
-                      {row.suffix && <span aria-hidden="true">{row.suffix}</span>}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+              <BarChart
+                eyebrow={automationChart.eyebrow}
+                title={automationChart.title}
+                body={automationChart.body}
+                data={automationVolume}
+                unit={automationChart.unit}
+                columns={automationChart.columns}
+                source={automationChart.source}
+                tone="dark"
+              />
             )}
           </section>
         ))

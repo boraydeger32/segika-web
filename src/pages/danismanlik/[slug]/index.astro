@@ -6,6 +6,7 @@ import PageHero from '../../../components/PageHero.astro';
 import Eyebrow from '../../../components/Eyebrow.astro';
 import Button from '../../../components/Button.astro';
 import CallToAction from '../../../components/CallToAction.astro';
+import Icon from '../../../components/Icon.astro';
 import { contact } from '../../../data/site';
 import { consultingPages } from '../../../data/consulting-pages';
 
@@ -72,9 +73,12 @@ const others = consultingPages.filter((p) => p.slug !== page.slug);
             <li>
               <a
                 href={url(`/danismanlik/${other.slug}/`)}
-                class="group grid gap-2 py-5 lg:grid-cols-[3rem_minmax(0,22rem)_minmax(0,1fr)] lg:items-baseline lg:gap-8"
+                class="group grid gap-2 py-5 lg:grid-cols-[4.5rem_minmax(0,22rem)_minmax(0,1fr)] lg:items-baseline lg:gap-8"
               >
-                <span class="font-mono text-label text-ink-muted">{other.index}</span>
+                <span class="flex items-center gap-2.5 font-mono text-label text-ink-muted">
+                  {other.index}
+                  <span class="text-accent"><Icon name={other.icon} size={18} /></span>
+                </span>
                 <span class="text-h3 font-medium group-hover:text-accent">{other.name}</span>
                 <span class="text-small text-ink-muted">{other.intro}</span>
               </a>

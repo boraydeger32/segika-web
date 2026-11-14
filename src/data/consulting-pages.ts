@@ -3,8 +3,12 @@
  * Hizmet kalemlerinin tamamı segika.com ana sayfasındaki listelerden birebir alındı.
  */
 
+import type { IconName } from '../lib/icons';
+
 export type ConsultingPage = {
   slug: string;
+  /** Çizgi ikon — bkz. src/lib/icons.ts */
+  icon: IconName;
   index: string;
   name: string;
   headline: string;
@@ -19,6 +23,7 @@ export type ConsultingPage = {
 export const consultingPages: ConsultingPage[] = [
   {
     slug: 'is-ve-sosyal-guvenlik-hukuku-danismanligi',
+    icon: 'terazi',
     index: '01',
     name: 'İş ve Sosyal Güvenlik Hukuku Danışmanlığı',
     headline: 'Riski dava açılmadan önce görün.',
@@ -47,6 +52,7 @@ export const consultingPages: ConsultingPage[] = [
   },
   {
     slug: 'insan-kaynaklari-yonetimi',
+    icon: 'ekip',
     index: '02',
     name: 'İnsan Kaynakları Yönetimi',
     headline: 'İK’yı kurumsal bir sisteme dönüştürün.',
@@ -80,6 +86,7 @@ export const consultingPages: ConsultingPage[] = [
   },
   {
     slug: 'personel-bulma-ve-ise-alim',
+    icon: 'ise-alim',
     index: '03',
     name: 'Personel Bulma ve İşe Alım',
     headline: 'Doğru adayı, doğru süreçle bulun.',

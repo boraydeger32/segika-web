@@ -1,0 +1,358 @@
+---
+/**
+ * Yatay sütun grafiği — ECharts.
+ *
+ * Neden yatay: kategori adları Türkçe ve uzun ("Kimlik bildirimi · personel").
+ * Dikey sütunda bu etiketler ya eğik yazılır ya kesilir; ikisi de okunaksız.
+ *
+ * Neden ECharts: yöneticinin isteği. Ama üç kural konuldu —
+ *  1. Paket gövdede değil: `echarts/core` + yalnızca gereken modüller
+ *     dinamik `import()` ile, bölüm görünür olunca indiriliyor. İlk yüklemeye
+ *     tek bayt eklemiyor.
+ *  2. JS gelmezse içerik kaybolmuyor: tablo sunucuda basılıyor ve sayfada
+ *     görünür duruyor. Grafik başarıyla kurulursa tablo `sr-only`'ye geçiyor —
+ *     ekran okuyucu yine okuyor, göz artık grafiği görüyor.
+ *  3. Renkler token katmanından okunuyor; grafik ikinci bir palet açmıyor.
+ *
+ * Grafik süsü yok: ızgara çizgisi, açıklama kutusu (legend), eksen oku,
+ * gölge, 3B yok. Değer etiketi doğrudan çubuğun ucunda.
+ */
+
+import Eyebrow from '../Eyebrow.astro';
+import type { BarDatum } from '../../lib/chart';
+
+type Props = {
+  eyebrow?: string;
+  title: string;
+  /** Başlık altındaki açıklama. */
+  body?: string;
+  data: BarDatum[];
+  /** Değerin birimi — eksen etiketinin sonuna eklenir. */
+  unit?: string;
+  /** Tablo başlıkları. */
+  columns?: { label: string; value: string };
+  /** Kaynak satırı — her grafik nereden geldiğini söylemek zorunda. */
+  source: string;
+  /** Rakamların temsilî olduğu durumda işaretlenir. */
+  representative?: boolean;
+  tone?: 'light' | 'dark';
+  /** Grafik yüksekliği; satır sayısına göre ayarlanır. */
+  height?: number;
+  class?: string;
+};
+
+const {
+  eyebrow,
+  title,
+  body,
+  data,
+  unit = '',
+  columns = { label: 'Kalem', value: 'Adet' },
+  source,
+  representative = false,
+  tone = 'light',
+  height,
+  class: className = '',
+} = Astro.props;
+
+/** Satır başına 46px + eksen payı. Az satırda grafik gereksiz uzamıyor. */
+const chartHeight = height ?? Math.max(180, data.length * 46 + 36);
+
+const dark = tone === 'dark';
+const id = `chart-${Math.random().toString(36).slice(2, 9)}`;
+
+/** Tabloda ve ipuçlarında kullanılacak toplam — satırların anlamı için. */
+const max = Math.max(...data.map((d) => d.value));
+---
+
+<figure class={`not-prose ${className}`} data-bar-chart>
+  <figcaption>
+    {eyebrow && <Eyebrow tone={dark ? 'inverse' : 'default'}>{eyebrow}</Eyebrow>}
+    <div class="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+      <h3 class={`text-h3 font-medium ${dark ? 'text-ink-inverse' : ''}`}>{title}</h3>
+      {
+        representative && (
+          <span
+            class={`rounded-full border px-2.5 py-1 font-mono text-chip uppercase ${
+              dark ? 'border-hairline-inverse text-ink-subtle' : 'border-hairline text-ink-muted'
+            }`}
+          >
+            Temsilî
+          </span>
+        )
+      }
+    </div>
+    {
+      body && (
+        <p class={`mt-3 max-w-[52ch] text-small ${dark ? 'text-ink-subtle' : 'text-ink-muted'}`}>
+          {body}
+        </p>
+      )
+    }
+  </figcaption>
+
+  {/* Grafik tuvali — JS kurduğunda dolar */}
+  <div
+    id={id}
+    class="mt-7"
+    style={`height:${chartHeight}px`}
+    data-chart-canvas
+    data-tone={tone}
+    data-unit={unit}
+    data-series={JSON.stringify(data)}
+    aria-hidden="true"
+    hidden
+  >
+  </div>
+
+  {/*
+    Yedek tablo. JS'siz tek içerik bu; grafik kurulunca `sr-only` oluyor.
+    Çubuklar CSS ile — grafik hiç gelmese de oran görünür kalsın.
+  */}
+  <div class="mt-7" data-chart-table>
+    <table class="w-full border-collapse text-small">
+      <caption class="sr-only">{title} — {source}</caption>
+      <thead>
+        <tr
+          class={`border-b ${dark ? 'border-hairline-inverse text-ink-subtle' : 'border-hairline text-ink-muted'}`}
+        >
+          <th scope="col" class="py-2.5 pr-4 text-left font-mono text-chip font-normal uppercase">
+            {columns.label}
+          </th>
+          <th scope="col" class="py-2.5 text-right font-mono text-chip font-normal uppercase">
+            {columns.value}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          data.map((d) => (
+            <tr class={`border-b ${dark ? 'border-hairline-inverse' : 'border-hairline'}`}>
+              <th
+                scope="row"
+                class={`py-3 pr-4 text-left font-normal ${dark ? 'text-ink-inverse' : ''}`}
+              >
+                {d.label}
+                {d.note && (
+                  <span class={`block text-chip ${dark ? 'text-ink-subtle' : 'text-ink-muted'}`}>
+                    {d.note}
+                  </span>
+                )}
+              </th>
+              <td class="py-3 align-top">
+                <div class="flex items-center justify-end gap-3">
+                  <span
+                    class={`h-1.5 w-full max-w-[12rem] overflow-hidden rounded-full ${dark ? 'bg-hairline-inverse' : 'bg-wash'}`}
+                    aria-hidden="true"
+                  >
+                    <span
+                      class={`block h-full rounded-full ${dark ? 'bg-brand' : 'bg-accent'}`}
+                      style={`width:${Math.round((d.value / max) * 100)}%`}
+                    />
+                  </span>
+                  <span
+                    class={`shrink-0 font-mono tabular-nums ${dark ? 'text-ink-inverse' : ''}`}
+                  >
+                    {d.display}
+                    {unit}
+                  </span>
+                </div>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <p class={`mt-4 font-mono text-chip ${dark ? 'text-ink-subtle' : 'text-ink-muted'}`}>
+    Kaynak: {source}
+  </p>
+</figure>
+
+<style>
+  /* Grafik kurulduğunda tablo gözden çekilir, erişilebilirlik ağacında kalır. */
+  [data-bar-chart][data-ready='true'] [data-chart-table] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>
+
+<script>
+  /**
+   * Grafik kurucu.
+   *
+   * Yükleme sırası: bölüm görüş alanına girer → ECharts chunk'ı indirilir →
+   * grafik kurulur → tablo sr-only'ye geçer. Herhangi bir adım başarısız
+   * olursa tablo olduğu yerde kalır, sayfa bozulmaz.
+   */
+  type Datum = { label: string; value: number; display: string; note?: string };
+
+  const figures = document.querySelectorAll<HTMLElement>('[data-bar-chart]');
+  if (figures.length) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /**
+     * ECharts bir kez indirilir, sayfadaki tüm grafikler paylaşır.
+     * Hangi modüllerin kaydedildiği `src/lib/echarts.ts` içinde — barrel
+     * modülleri buradan dinamik çağırmak tree-shaking'i bozuyordu.
+     */
+    let corePromise: Promise<typeof import('../../lib/echarts')> | null = null;
+    function loadCore() {
+      corePromise ??= import('../../lib/echarts');
+      return corePromise;
+    }
+
+    /** Renkler token katmanından okunuyor — grafik ikinci palet açmıyor. */
+    function token(name: string) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    async function build(figure: HTMLElement) {
+      const canvas = figure.querySelector<HTMLElement>('[data-chart-canvas]');
+      if (!canvas) return;
+
+      let data: Datum[];
+      try {
+        data = JSON.parse(canvas.dataset.series ?? '[]');
+      } catch {
+        return;
+      }
+      if (!data.length) return;
+
+      const dark = canvas.dataset.tone === 'dark';
+      const unit = canvas.dataset.unit ?? '';
+
+      const { echarts } = await loadCore();
+
+      const ink = dark ? token('--color-ink-inverse') : token('--color-ink');
+      const muted = dark ? token('--color-ink-subtle') : token('--color-ink-muted');
+      const bar = dark ? token('--color-brand') : token('--color-accent');
+      const surface = dark ? token('--color-void-soft') : token('--color-surface');
+      const line = dark ? token('--color-hairline-inverse') : token('--color-hairline');
+
+      canvas.hidden = false;
+      canvas.removeAttribute('aria-hidden');
+      const chart = echarts.init(canvas, undefined, { renderer: 'canvas' });
+
+      /*
+        Sol boşluk en uzun etikete göre, ama tuvalin kendi genişliğine de
+        bağlı. Sabit 192px, 360px'lik ekranda çubuğa 56px bırakıyordu —
+        grafik okunmaz oluyordu. Üst sınır tuval genişliğinin %42'si.
+        Etiket sığmazsa ECharts kendi kısaltıyor (overflow: truncate).
+      */
+      const longest = data.reduce((a, d) => Math.max(a, d.label.length), 0);
+      const layout = (w: number) => {
+        const left = Math.max(72, Math.min(longest * 7.4, w * 0.42));
+        /* Değer etiketi için sağ pay; dar ekranda daralıyor. */
+        const right = w < 520 ? 56 : 72;
+        return { left, right };
+      };
+
+      chart.setOption({
+        animation: !reduced,
+        animationDuration: 760,
+        animationDelay: (i: number) => i * 70,
+        animationEasing: 'cubicOut',
+        grid: { ...layout(canvas.clientWidth), top: 4, bottom: 4, containLabel: false },
+        tooltip: {
+          trigger: 'item',
+          backgroundColor: surface,
+          borderColor: line,
+          borderWidth: 1,
+          padding: [10, 12],
+          textStyle: { color: ink, fontSize: 13, fontFamily: 'inherit' },
+          extraCssText: 'box-shadow:0 8px 24px rgb(0 0 0 / 0.1);border-radius:8px;',
+          formatter: (p: { dataIndex: number }) => {
+            const d = data[p.dataIndex];
+            const note = d.note ? `<div style="color:${muted};margin-top:4px">${d.note}</div>` : '';
+            return `<strong>${d.label}</strong><div style="font-variant-numeric:tabular-nums;margin-top:2px">${d.display}${unit}</div>${note}`;
+          },
+        },
+        xAxis: {
+          type: 'value',
+          show: false,
+          /* Değer etiketi çubuğun sağına yazılıyor; üst sınır ona yer açıyor.
+             Ayrıca en uzun çubuk tavana dayanmıyor — "doldu" gibi okunmuyor. */
+          max: (v: { max: number }) => v.max * 1.16,
+        },
+        yAxis: {
+          type: 'category',
+          inverse: true,
+          data: data.map((d) => d.label),
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: {
+            color: muted,
+            fontSize: 13,
+            fontFamily: 'inherit',
+            width: layout(canvas.clientWidth).left - 14,
+            overflow: 'truncate',
+          },
+        },
+        series: [
+          {
+            type: 'bar',
+            data: data.map((d) => d.value),
+            /* Az satırda ince çubuk kayboluyor, satır arası boşlukta eriyor.
+               Kalınlık satır sayısına bağlandı. */
+            barWidth: data.length <= 4 ? 20 : 13,
+            /* Hafif yuvarlatma: pill biçimi oyuncak gibi duruyordu. */
+            itemStyle: { color: bar, borderRadius: [0, 3, 3, 0] },
+            label: {
+              show: true,
+              position: 'right',
+              distance: 12,
+              color: ink,
+              fontSize: 13,
+              fontWeight: 500,
+              fontFamily: 'inherit',
+              formatter: (p: { dataIndex: number }) => `${data[p.dataIndex].display}${unit}`,
+            },
+            emphasis: { itemStyle: { color: dark ? token('--color-electric') : bar, opacity: 0.88 } },
+          },
+        ],
+      });
+
+      figure.dataset.ready = 'true';
+
+      /* Genişlik değişiminde yeniden ölçeklenir; yükseklik CSS'ten geliyor. */
+      const reflow = () => {
+        const w = canvas.clientWidth;
+        const { left, right } = layout(w);
+        chart.setOption({
+          grid: { left, right },
+          yAxis: { axisLabel: { width: left - 14 } },
+        });
+        chart.resize();
+      };
+      if ('ResizeObserver' in window) {
+        new ResizeObserver(reflow).observe(canvas);
+      } else {
+        window.addEventListener('resize', reflow);
+      }
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          io.unobserve(entry.target);
+          build(entry.target as HTMLElement).catch(() => {
+            /* Sessiz geç: tablo yerinde duruyor, içerik kaybolmadı. */
+          });
+        }
+      },
+      { rootMargin: '240px 0px' },
+    );
+
+    figures.forEach((f) => io.observe(f));
+  }
+</script>

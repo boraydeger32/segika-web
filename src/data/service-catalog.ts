@@ -9,8 +9,12 @@
  * yeni bir özellik iddiası eklenmedi.
  */
 
+import type { IconName } from '../lib/icons';
+
 export type CatalogItem = {
   code: string;
+  /** Çizgi ikon — bkz. src/lib/icons.ts */
+  icon: IconName;
   name: string;
   /** Tek cümlede ne yaptığı. */
   summary: string;
@@ -25,6 +29,7 @@ export type CatalogItem = {
 export const software: CatalogItem[] = [
   {
     code: 'TŞV',
+    icon: 'tesvik',
     name: 'SGK Teşvik Programı',
     summary:
       'Yürürlükteki tüm teşvikleri hesaplar, en yüksek olanı seçer ve raporlar.',
@@ -39,6 +44,7 @@ export const software: CatalogItem[] = [
   },
   {
     code: 'VZT',
+    icon: 'vizite',
     name: 'SGK Vizite Programı',
     summary:
       'Sağlık raporlarını SMS onayı olmadan otomatik onaylar, iş kazalarını izler.',
@@ -53,6 +59,7 @@ export const software: CatalogItem[] = [
   },
   {
     code: 'KML',
+    icon: 'kimlik',
     name: 'Kimlik Bildirimi Programı',
     summary:
       'İşe giren ve çıkan personeli Emniyet ya da Jandarma’ya otomatik bildirir.',
@@ -67,6 +74,7 @@ export const software: CatalogItem[] = [
   },
   {
     code: 'İŞK',
+    icon: 'iskur',
     name: 'İşkur Bildirimi Programı',
     summary:
       'SGK verisinden İŞKUR işgücü çizelgesini üretir ve bildirir.',
@@ -81,6 +89,7 @@ export const software: CatalogItem[] = [
   },
   {
     code: 'ARÇ',
+    icon: 'araclar',
     name: 'SGK Araçları ve Raporlar',
     summary:
       'Borç, hizmet listesi, tahakkuk ve emanet alacaklarını tek panelden yönetir.',
@@ -95,6 +104,7 @@ export const software: CatalogItem[] = [
   },
   {
     code: 'İK',
+    icon: 'ekip',
     name: 'İnsan Kaynakları Araçları',
     summary:
       'Tazminat, maaş, deneme süresi ve MYK belgesi takibini otomatikleştirir.',

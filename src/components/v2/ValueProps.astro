@@ -1,0 +1,96 @@
+---
+/**
+ * Değer önerileri bölümü.
+ *
+ * Tasarım notu — neden kart değil: brifing "tekrar eden üç kartlı ızgara"yı
+ * kaçınılacaklar listesine koymuş. Burada kart yok; hücreler yalnızca saç
+ * çizgisiyle ayrılıyor, kenarlık/gölge/dolgu yok. Sayfanın geri kalanındaki
+ * defter diliyle aynı: çizgi ayırır, kutu ayırmaz.
+ *
+ * Numaralandırma da yok: bu maddeler bir sıra değil, bir küme. Sıra
+ * belirtmeyen içeriğe 01/02/03 koymak süslemeden ibaret kalıyor.
+ */
+
+import Container from '../Container.astro';
+import Eyebrow from '../Eyebrow.astro';
+import Icon from '../Icon.astro';
+import type { ValueProp } from '../../data/value-props';
+
+type Props = {
+  eyebrow: string;
+  title: string;
+  body?: string;
+  items: ValueProp[];
+  tone?: 'light' | 'dark';
+  /** Masaüstü sütun sayısı — Landing'de üç madde var, ikiye bölmek boşluk bırakıyor. */
+  columns?: 2 | 3;
+  class?: string;
+};
+
+const {
+  eyebrow,
+  title,
+  body,
+  items,
+  tone = 'light',
+  columns = 3,
+  class: className = '',
+} = Astro.props;
+
+const dark = tone === 'dark';
+
+/* Aynı sayfada iki kez kullanılabilir — başlık id'si eşsiz olmalı. */
+const headingId = `deger-${Math.random().toString(36).slice(2, 8)}`;
+
+/* Saç çizgisi rengi ve metin tonları tek yerden. */
+const rule = dark ? 'border-void-line' : 'border-hairline';
+const muted = dark ? 'text-ink-subtle' : 'text-ink-muted';
+
+/*
+  Sol dikey çizgi yalnızca sütunun ilkinde olmasın. Sütun sayısı değişince
+  nth-child adımı da değişiyor, o yüzden sınıf burada kuruluyor.
+*/
+const gridCols = columns === 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-3';
+const firstInRow =
+  columns === 2
+    ? 'lg:[&:nth-child(2n+1)]:border-l-0 lg:[&:nth-child(2n+1)]:pl-0'
+    : 'lg:[&:nth-child(3n+1)]:border-l-0 lg:[&:nth-child(3n+1)]:pl-0';
+---
+
+<section class={`border-t ${rule} ${className}`} aria-labelledby={headingId}>
+  <Container class="py-(--spacing-section)">
+    <div class="max-w-[46ch]">
+      <Eyebrow tone={dark ? 'inverse' : 'default'}>{eyebrow}</Eyebrow>
+      <h2 id={headingId} class={`mt-4 text-h2 ${dark ? 'text-ink-inverse' : ''}`}>{title}</h2>
+      {body && <p class={`mt-4 text-small ${muted}`}>{body}</p>}
+    </div>
+
+    <ul class={`mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2 ${gridCols}`}>
+      {
+        items.map((item) => (
+          <li class={`border-t ${rule} pt-7 lg:border-l lg:pl-8 ${firstInRow}`}>
+            <span class={dark ? 'text-brand' : 'text-accent'}>
+              <Icon name={item.icon} size={26} />
+            </span>
+            <h3 class={`mt-5 text-h3 font-medium ${dark ? 'text-ink-inverse' : ''}`}>
+              {item.title}
+            </h3>
+            <p class={`mt-3 text-small ${muted}`}>{item.body}</p>
+            {
+              item.proof && (
+                <p
+                  class={`mt-5 inline-flex items-center gap-2 font-mono text-chip uppercase tabular-nums ${
+                    dark ? 'text-brand' : 'text-accent'
+                  }`}
+                >
+                  <Icon name="onay" size={13} />
+                  {item.proof}
+                </p>
+              )
+            }
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+</section>

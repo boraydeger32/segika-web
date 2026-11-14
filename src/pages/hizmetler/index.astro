@@ -3,9 +3,12 @@ import { url } from '../../lib/url';
 import Master from '../../layouts/Master.astro';
 import Container from '../../components/Container.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
+import Icon from '../../components/Icon.astro';
+import ValueProps from '../../components/v2/ValueProps.astro';
 import { software, matrix, guide } from '../../data/service-catalog';
 import { services } from '../../data/services';
 import { cta, contact } from '../../data/site';
+import { valueProps } from '../../data/value-props';
 
 /**
  * Services — yarışma teslimi, 2/3.
@@ -80,9 +83,14 @@ import { cta, contact } from '../../data/site';
         {
           software.map((item, i) => (
             <article class="grid gap-x-10 gap-y-5 py-9 lg:grid-cols-[4rem_minmax(0,24rem)_minmax(0,1fr)]">
-              <p class="font-mono text-chip tabular-nums text-ink-muted lg:pt-1.5">
-                {String(i + 1).padStart(2, '0')}
-              </p>
+              <div class="flex items-center gap-3 lg:flex-col lg:items-start lg:gap-4 lg:pt-1">
+                <p class="font-mono text-chip tabular-nums text-ink-muted">
+                  {String(i + 1).padStart(2, '0')}
+                </p>
+                <span class="text-accent">
+                  <Icon name={item.icon} size={30} />
+                </span>
+              </div>
 
               <div>
                 <h3 class="text-h3 font-medium">{item.name}</h3>
@@ -118,20 +126,9 @@ import { cta, contact } from '../../data/site';
                 <ul class="mt-3 grid gap-x-8 gap-y-2 sm:grid-cols-2">
                   {item.scope.map((s) => (
                     <li class="flex gap-2.5 text-small text-ink-muted">
-                      <svg
-                        class="mt-[0.35em] h-3 w-3 shrink-0 text-electric"
-                        viewBox="0 0 12 12"
-                        fill="none"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="m2 6.2 2.6 2.6L10 3.4"
-                          stroke="currentColor"
-                          stroke-width="1.6"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
+                      <span class="mt-[0.3em] text-accent">
+                        <Icon name="onay" size={13} />
+                      </span>
                       {s}
                     </li>
                   ))}
@@ -236,7 +233,15 @@ import { cta, contact } from '../../data/site';
     </Container>
   </section>
 
-  {/* 4 · Seçim rehberi — profil bazlı */}
+  {/* 4 · Değer önerileri — katalogdan sonra "neden biz" */}
+  <ValueProps
+    eyebrow="Neden Segika"
+    title="Hangi modülü seçerseniz geçerli"
+    body="Altı başlık modüllerin tamamında ortak. Kapsamı siz seçiyorsunuz, bunlar değişmiyor."
+    items={valueProps}
+  />
+
+  {/* 5 · Seçim rehberi — profil bazlı */}
   <section aria-labelledby="rehber-baslik">
     <Container class="framed py-(--spacing-section)">
       <div class="rise max-w-[44rem]">
@@ -264,7 +269,7 @@ import { cta, contact } from '../../data/site';
     </Container>
   </section>
 
-  {/* 5 · Danışmanlık — yazılımın bitmediği yer */}
+  {/* 6 · Danışmanlık — yazılımın bitmediği yer */}
   <section class="border-t border-rule" aria-labelledby="dan-baslik">
     <Container class="framed py-(--spacing-section)">
       <div class="rise max-w-[44rem]">
@@ -300,7 +305,7 @@ import { cta, contact } from '../../data/site';
     </Container>
   </section>
 
-  {/* 6 · Kapanış — koyu */}
+  {/* 7 · Kapanış — koyu */}
   <section class="ruled-void border-t border-rule text-ink-inverse">
     <Container class="py-(--spacing-section)">
       <div class="stagger mx-auto max-w-[34rem] text-center">
