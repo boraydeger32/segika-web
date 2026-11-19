@@ -86,7 +86,9 @@ export function mountCharts(selector: string, build: Builder): void {
       if (typeof reflow === 'function') reflow();
       chart.resize();
     };
-    if ('ResizeObserver' in window) new ResizeObserver(onResize).observe(canvas);
+    /* `'ResizeObserver' in window` kullanılmıyor: TypeScript bunu tip
+       daraltması sayıp else dalında `window`'u `never` yapıyor. */
+    if (typeof ResizeObserver === 'function') new ResizeObserver(onResize).observe(canvas);
     else window.addEventListener('resize', onResize);
   }
 

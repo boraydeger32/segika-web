@@ -1,0 +1,130 @@
+---
+/**
+ * JSON-LD yapısal verisi.
+ *
+ * Neden var: sayfayı okuyan insan başlıkları, boşluğu ve grafiği görüyor;
+ * makine bunların hiçbirini görmüyor. Yapısal veri, sayfanın içeriğini
+ * makinenin okuyabileceği tek biçimde tekrar anlatıyor — hangi kuruluş,
+ * hangi ürün, hangi soru-cevap, hangi adım.
+ *
+ * Tek kural: **şemada, sayfada görünmeyen hiçbir şey iddia edilmiyor.**
+ * Soru-cevap ve adımlar `src/data/landing.ts` içinden geliyor; aynı dizi
+ * hem ekrana basılıyor hem buraya giriyor, bu yüzden ikisi yapısal olarak
+ * ayrışamıyor. Fiyat alanı da yok: fiyat bilgisi elimizde olmadığı için
+ * `offers` yazmak uydurma olurdu.
+ *
+ * `set:html` + `JSON.stringify` kullanılıyor; Astro bunu olduğu gibi basar.
+ * Değerler veri katmanından geldiği ve JSON.stringify kaçışladığı için
+ * `</script>` enjeksiyonu riski yok.
+ */
+
+import { site, contact } from '../data/site';
+import type { FaqItem, Step } from '../data/landing';
+
+type Crumb = { name: string; path: string };
+
+interface Props {
+  /** Sayfanın mutlak adresi — her düğüm bununla kimliklendiriliyor. */
+  canonical: string;
+  /** Kuruluş kartı. Yalnızca Master'da bir kez basılmalı. */
+  organization?: boolean;
+  /** Ürün kartı — SGK otomasyon yazılımı. */
+  software?: { name: string; description: string };
+  faq?: FaqItem[];
+  steps?: { name: string; description: string; items: Step[] };
+  breadcrumbs?: Crumb[];
+}
+
+const { canonical, organization, software, faq, steps, breadcrumbs } = Astro.props;
+
+const abs = (path: string) => new URL(path, site.url).href;
+
+const graph: Record<string, unknown>[] = [];
+
+if (organization) {
+  graph.push({
+    '@type': 'Organization',
+    '@id': `${site.url}/#organization`,
+    name: site.name,
+    description: site.tagline,
+    url: site.url,
+    logo: abs('/brand/segika-wordmark.png'),
+    telephone: [contact.phone.label, contact.gsm.label],
+    email: contact.email.label.replace('mailto:', ''),
+    areaServed: { '@type': 'Country', name: 'Türkiye' },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      telephone: contact.phone.label,
+      email: contact.email.label,
+      availableLanguage: ['Turkish'],
+    },
+  });
+}
+
+if (software) {
+  graph.push({
+    '@type': 'SoftwareApplication',
+    '@id': `${site.url}/#software`,
+    name: software.name,
+    description: software.description,
+    applicationCategory: 'BusinessApplication',
+    applicationSubCategory: 'Payroll & Social Security Automation',
+    operatingSystem: 'Web',
+    url: site.url,
+    inLanguage: 'tr-TR',
+    publisher: { '@id': `${site.url}/#organization` },
+    /*
+      `offers` bilerek yok: fiyat ve plan bilgisi bize verilmedi, mevcut
+      sitede de yayınlanmıyor. Boş ya da uydurma bir fiyat yazmaktansa
+      alanı hiç açmamak doğru.
+    */
+  });
+}
+
+if (faq?.length) {
+  graph.push({
+    '@type': 'FAQPage',
+    '@id': `${canonical}#faq`,
+    /* Yalnızca sayfada görünen sorular — bkz. src/data/landing.ts */
+    mainEntity: faq.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: { '@type': 'Answer', text: item.answer },
+    })),
+  });
+}
+
+if (steps?.items.length) {
+  graph.push({
+    '@type': 'HowTo',
+    '@id': `${canonical}#howto`,
+    name: steps.name,
+    description: steps.description,
+    inLanguage: 'tr-TR',
+    step: steps.items.map((s, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: s.title,
+      text: s.body,
+    })),
+  });
+}
+
+if (breadcrumbs?.length) {
+  graph.push({
+    '@type': 'BreadcrumbList',
+    '@id': `${canonical}#breadcrumbs`,
+    itemListElement: breadcrumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.name,
+      item: abs(c.path),
+    })),
+  });
+}
+
+const payload = { '@context': 'https://schema.org', '@graph': graph };
+---
+
+{graph.length > 0 && <script type="application/ld+json" set:html={JSON.stringify(payload)} />}

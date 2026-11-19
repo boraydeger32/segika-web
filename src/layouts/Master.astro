@@ -4,7 +4,9 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Motion from '../components/v2/Motion.astro';
+import StructuredData from '../components/StructuredData.astro';
 import { site } from '../data/site';
+import type { FaqItem, Step } from '../data/landing';
 
 /**
  * Master page — Home, Landing ve Services sayfalarının ortak iskeleti.
@@ -27,6 +29,19 @@ interface Props {
   bodyClass?: string;
   /** Arama motorlarından gizlenecek sayfalar (geçici/kopya içerik). */
   noindex?: boolean;
+  /**
+   * Sayfaya özel yapısal veri. Kuruluş kartı her sayfada otomatik basılıyor;
+   * burada yalnızca sayfanın kendine ait düğümleri veriliyor.
+   * Kural: buraya giren her şey sayfada da görünür olmalı.
+   */
+  schema?: {
+    software?: { name: string; description: string };
+    faq?: FaqItem[];
+    steps?: { name: string; description: string; items: Step[] };
+    breadcrumbs?: { name: string; path: string }[];
+  };
+  /** Paylaşım görseli — sayfaya özel bir kart varsa. */
+  ogImage?: string;
 }
 
 const {
@@ -36,9 +51,14 @@ const {
   headerTone = 'light',
   bodyClass = 'ruled',
   noindex = false,
+  schema,
+  ogImage = '/brand/og-default.png',
 } = Astro.props;
 
 const canonical = new URL(canonicalPath ?? Astro.url.pathname, site.url).href;
+/* Paylaşım görselinin mutlak olması gerekiyor; göreli adres çoğu platformda
+   çözülmüyor. `url()` taban yolunu ekliyor, `new URL` mutlaklaştırıyor. */
+const ogImageUrl = new URL(url(ogImage), site.url).href;
 ---
 
 <!doctype html>
@@ -73,6 +93,24 @@ const canonical = new URL(canonicalPath ?? Astro.url.pathname, site.url).href;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <StructuredData
+      canonical={canonical}
+      organization
+      software={schema?.software}
+      faq={schema?.faq}
+      steps={schema?.steps}
+      breadcrumbs={schema?.breadcrumbs}
+    />
   </head>
 
   <body class={bodyClass}>

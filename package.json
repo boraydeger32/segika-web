@@ -12,7 +12,9 @@
     "astro": "astro",
     "audit": "node tools/audit.mjs",
     "a11y": "node tools/a11y.mjs",
-    "links": "node tools/links.mjs"
+    "links": "node tools/links.mjs",
+    "schema": "node tools/schema.mjs",
+    "og": "node tools/og-image.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
