@@ -36,3 +36,21 @@ export function url(path: string): string {
 
   return `${BASE}${path}`;
 }
+
+/**
+ * Taban yolunu söker — canonical ve paylaşım görseli için.
+ *
+ * `url()` GitHub Pages alt dizini için yol başına `/segika-web` ekliyor.
+ * Bu, sitenin kendi içindeki bağlantılar için doğru; ama canonical'ın işi
+ * "bu sayfanın gerçek adresi şu" demek ve gerçek adres üretim alan adının
+ * kökünde duruyor. İkisi birleşince ortaya hiç var olmayan bir adres
+ * çıkıyordu: https://www.segika.com/segika-web/tesvik-analizi/
+ *
+ * Bu yüzden canonical ve og:image mutlaklaştırılırken taban yolu önce
+ * sökülüyor; sonuç her iki dağıtımda da üretim adresini gösteriyor.
+ */
+export function bare(path: string): string {
+  if (!BASE) return path;
+  if (path === BASE) return '/';
+  return path.startsWith(`${BASE}/`) ? path.slice(BASE.length) : path;
+}

@@ -63,7 +63,7 @@ export const landingFaq: FaqItem[] = [
     answer:
       'Gizlilik politikamız hangi kişisel verinin hangi amaçla işlendiğini açıklar. Sorularınız için doğrudan bize ulaşabilirsiniz.',
     source: 'segika.com/gizlilik-politikasi',
-    link: { label: 'Gizlilik politikasını okuyun', href: '/gizlilik-politikasi/' },
+    link: { label: 'Gizlilik politikasını okuyun', href: '/kurallar/gizlilik-politikasi/' },
   },
   {
     question: 'Birden fazla işyerim var, hepsi tek hesapta mı?',
